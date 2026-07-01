@@ -1,4 +1,4 @@
-]<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -238,6 +238,39 @@
   .sb-item:focus-visible, .module-card:focus-visible{
     outline:2px solid var(--teal); outline-offset:-2px;
   }
+
+  /* ===== live / real-time widgets ===== */
+  .livepill{
+    display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:700; color:var(--red);
+    background:var(--redtint); padding:4px 10px; border-radius:20px;
+  }
+  .livepill .blip{width:6px; height:6px; border-radius:50%; background:var(--red); animation:blip 1.4s infinite;}
+  @keyframes blip{0%,100%{opacity:1;} 50%{opacity:.25;}}
+  .refresh-note{font-size:10.5px; color:var(--ink-faint); display:flex; align-items:center; gap:5px;}
+
+  .board{background:var(--navy); border-radius:14px; padding:20px 22px; color:#fff;}
+  .board-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:14px;}
+  .board-cell{
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:11px;
+    padding:16px; text-align:center;
+  }
+  .board-cell .dept{font-size:11px; color:rgba(255,255,255,.6); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;}
+  .board-cell .num{font-family:'Manrope'; font-weight:800; font-size:34px; line-height:1;}
+  .board-cell .num small{font-size:15px; font-weight:600; color:rgba(255,255,255,.45);}
+  .board-cell .sub{font-size:10.5px; margin-top:6px; color:rgba(255,255,255,.55);}
+  .board-cell.ok .num{color:#5FD8A6;}
+  .board-cell.tight .num{color:var(--amber);}
+  .board-cell.full .num{color:#FF8A80;}
+
+  .facility-row{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px dashed var(--line);}
+  .facility-row:last-child{border-bottom:none;}
+  .facility-row .fname{flex:1; min-width:0;}
+  .facility-row .fname .n{font-weight:700; font-size:12.5px;}
+  .facility-row .fname .d{font-size:10.5px; color:var(--ink-faint);}
+  .facility-row .fstat{display:flex; gap:18px; flex-shrink:0;}
+  .facility-row .fstat .item{text-align:center; min-width:52px;}
+  .facility-row .fstat .item .v{font-weight:700; font-size:12.5px;}
+  .facility-row .fstat .item .l{font-size:9.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.03em;}
   @media (prefers-reduced-motion: reduce){
     .screen.active{animation:none;}
   }
@@ -258,7 +291,7 @@
       <div class="box"><i class="bi bi-search"></i> Search modules, patients...</div>
     </div>
     <div class="sb-scroll" id="navScroll"></div>
-    <div class="sb-foot">GMH Nashik &nbsp;·&nbsp; v0.3 prototype</div>
+    <div class="sb-foot">GMH Mumbai &nbsp;·&nbsp; v0.3 prototype</div>
   </aside>
 
   <div class="main">
@@ -290,7 +323,7 @@
 const NAV = [
   {group:'Overview', items:[
     {id:'dashboard', label:'Dashboard', icon:'bi-grid-1x2'},
-    {id:'modulemap', label:'All modules', icon:'bi-diagram-3', badge:'28'},
+    {id:'modulemap', label:'All modules', icon:'bi-diagram-3', badge:'35'},
   ]},
   {group:'Outpatient', items:[
     {id:'registration', label:'Registration & ABHA', icon:'bi-person-vcard'},
@@ -327,6 +360,13 @@ const NAV = [
     {id:'mrd', label:'Medical records (MRD)', icon:'bi-archive'},
     {id:'nabh', label:'NABH checklist', icon:'bi-patch-check'},
     {id:'reports', label:'Reports & analytics', icon:'bi-bar-chart-line'},
+  ]},
+  {group:'Public & real-time', items:[
+    {id:'command', label:'Command centre (live)', icon:'bi-broadcast', badge:'LIVE'},
+    {id:'bedboard', label:'Public bed availability', icon:'bi-display'},
+    {id:'telemedicine', label:'Telemedicine (eSanjeevani)', icon:'bi-camera-video'},
+    {id:'programs', label:'National health programmes', icon:'bi-clipboard2-pulse'},
+    {id:'grievance', label:'Grievance redressal (CPGRAMS)', icon:'bi-megaphone'},
   ]},
   {group:'System', items:[
     {id:'roles', label:'Roles & access control', icon:'bi-shield-lock-fill'},
@@ -402,7 +442,7 @@ function status(color,text){return `<span class="status ${color}"><span class="d
 registerScreen('dashboard', () => `
   ${tag('Role: medical superintendent')}
   <h1 class="scr">Good morning, Dr. Adarsh</h1>
-  <p class="scr-sub">Cross-department snapshot across all 28 modules: General Medical Hospital, Nashik · Tuesday, 30 Jun</p>
+  <p class="scr-sub">Cross-department snapshot across all 28 modules: General Medical Hospital, Mumbai · Tuesday, 30 Jun</p>
 
   <div class="grid kpis">
     ${kpi('blue','bi-hospital','3%',true,'412 / 500','Beds occupied today')}
@@ -483,12 +523,17 @@ const MODULES = [
   ['ABDM / ABHA integration','bi-shield-lock','teal','1','abdm'],
   ['NABH compliance tracking','bi-patch-check','blue','3','nabh'],
   ['Analytics & MIS reporting','bi-bar-chart-line','teal','3','reports'],
+  ['State command centre (live feed)','bi-broadcast','red','1','command'],
+  ['Public bed availability board','bi-display','teal','1','bedboard'],
+  ['Telemedicine (eSanjeevani)','bi-camera-video','blue','3','telemedicine'],
+  ['National health programmes','bi-clipboard2-pulse','amber','2','programs'],
+  ['Grievance redressal (CPGRAMS)','bi-megaphone','red','3','grievance'],
   ['Patient portal / app','bi-phone','blue','4','portal'],
 ];
 const MODULE_TINTS = {blue:'bluetint', teal:'tealtint', amber:'ambertint', red:'redtint'};
 const MODULE_COLS = {blue:'#3B6FE0', teal:'#0E9C8C', amber:'#946C0B', red:'#D9534F'};
 registerScreen('modulemap', () => `
-  ${tag('28 modules · 4-phase build plan')}
+  ${tag('35 modules · 4-phase build plan')}
   <h1 class="scr">All modules</h1>
   <p class="scr-sub">Full module inventory researched against current HMS/HRMS standards and India's ABDM digital health mandate. Click any card to open its screen.</p>
   <div class="grid module-grid">
@@ -1186,6 +1231,187 @@ registerScreen('portal', () => `
       <div class="mini-stat"><span class="l">Active prescriptions</span><span class="v">2</span></div>
       <button class="btn primary btn-block" style="margin-top:12px;">Book appointment</button>
     </div>
+  </div>
+`);
+
+/* ============== COMMAND CENTRE (LIVE) ============== */
+registerScreen('command', () => `
+  <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+    ${tag('Role: district health officer · state HMIS')}
+    <span class="livepill"><span class="blip"></span> LIVE</span>
+  </div>
+  <h1 class="scr">District command centre</h1>
+  <p class="scr-sub">Real-time rollup across all government facilities in Mumbai district. Refreshes automatically every 60s.</p>
+
+  <div class="grid kpis">
+    ${kpi('teal','bi-hospital','',true,'1,284','Beds free (district-wide)')}
+    ${kpi('red','bi-heart-pulse','8%',false,'62','ICU beds free')}
+    ${kpi('blue','bi-lungs','',true,'11 / 12','Oxygen plants online')}
+    ${kpi('amber','bi-truck','',true,'34','Ambulances on active duty')}
+  </div>
+
+  <div class="grid twocol" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-head"><h3>Admissions vs discharges: last 24h</h3><span class="refresh-note"><i class="bi bi-arrow-repeat"></i> updated 40s ago</span></div>
+      <div class="chartwrap"><canvas id="cCommand"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>District alerts</h3></div>
+      <div class="alert red"><i class="bi bi-exclamation-triangle-fill"></i> Civil Hospital Malegaon: ICU at 96% occupancy</div>
+      <div class="alert amber"><i class="bi bi-droplet-half"></i> Rural Hospital Igatpuri: O2 cylinder stock low</div>
+      <div class="alert blue"><i class="bi bi-truck"></i> 3 ambulances flagged for maintenance today</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h3>Facility-wise live feed</h3><span class="more">Export CSV</span></div>
+    <div class="facility-row">
+      <div class="fname"><div class="n">GMH Mumbai (this facility)</div><div class="d">District General Hospital · 500 beds</div></div>
+      <div class="fstat">
+        <div class="item"><div class="v">88</div><div class="l">Free beds</div></div>
+        <div class="item"><div class="v">6</div><div class="l">ICU free</div></div>
+        <div class="item">${status('green','O2 OK')}</div>
+      </div>
+    </div>
+    <div class="facility-row">
+      <div class="fname"><div class="n">Civil Hospital, Malegaon</div><div class="d">Sub-district hospital · 200 beds</div></div>
+      <div class="fstat">
+        <div class="item"><div class="v">14</div><div class="l">Free beds</div></div>
+        <div class="item"><div class="v">1</div><div class="l">ICU free</div></div>
+        <div class="item">${status('amber','O2 watch')}</div>
+      </div>
+    </div>
+    <div class="facility-row">
+      <div class="fname"><div class="n">Rural Hospital, Igatpuri</div><div class="d">Rural hospital · 50 beds</div></div>
+      <div class="fstat">
+        <div class="item"><div class="v">9</div><div class="l">Free beds</div></div>
+        <div class="item"><div class="v">0</div><div class="l">ICU free</div></div>
+        <div class="item">${status('red','O2 low')}</div>
+      </div>
+    </div>
+    <div class="facility-row">
+      <div class="fname"><div class="n">PHC Trimbakeshwar</div><div class="d">Primary health centre · 12 beds</div></div>
+      <div class="fstat">
+        <div class="item"><div class="v">7</div><div class="l">Free beds</div></div>
+        <div class="item"><div class="v">—</div><div class="l">ICU free</div></div>
+        <div class="item">${status('green','O2 OK')}</div>
+      </div>
+    </div>
+  </div>
+`);
+window.init_command = () => {
+  const el = document.getElementById('cCommand'); if(!el) return;
+  new Chart(el, {type:'bar', data:{labels:['00h','04h','08h','12h','16h','20h'],
+    datasets:[
+      {label:'Admissions', data:[8,4,22,31,26,14], backgroundColor:'#3B6FE0', borderRadius:5, maxBarThickness:22},
+      {label:'Discharges', data:[3,2,14,19,24,20], backgroundColor:'#0E9C8C', borderRadius:5, maxBarThickness:22}
+    ]},
+  options:{plugins:{legend:{display:true, labels:{font:{size:10}, boxWidth:10}}}, scales:{y:{grid:{color:'#EEF2F7'}, ticks:{font:{size:10}}}, x:{grid:{display:false}, ticks:{font:{size:10}}}}}});
+};
+
+/* ============== PUBLIC BED AVAILABILITY BOARD ============== */
+registerScreen('bedboard', () => `
+  <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+    ${tag('Public display · lobby / kiosk screen')}
+    <span class="livepill"><span class="blip"></span> LIVE</span>
+  </div>
+  <h1 class="scr">Public bed availability board</h1>
+  <p class="scr-sub">Large-format display for hospital entrances and the public ORS portal, so patients can see availability before arriving.</p>
+
+  <div class="board">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div style="font-family:'Manrope'; font-weight:800; font-size:16px;">General Medical Hospital, Mumbai</div>
+      <div class="refresh-note" style="color:rgba(255,255,255,.6);"><i class="bi bi-arrow-repeat"></i> auto-refresh · updated 40s ago</div>
+    </div>
+    <div class="board-grid">
+      <div class="board-cell ok"><div class="dept">General ward</div><div class="num">88<small>/240</small></div><div class="sub">beds free</div></div>
+      <div class="board-cell tight"><div class="dept">ICU / critical</div><div class="num">6<small>/40</small></div><div class="sub">beds free</div></div>
+      <div class="board-cell ok"><div class="dept">Maternity</div><div class="num">17<small>/60</small></div><div class="sub">beds free</div></div>
+      <div class="board-cell full"><div class="dept">Paediatric</div><div class="num">1<small>/35</small></div><div class="sub">beds free</div></div>
+      <div class="board-cell ok"><div class="dept">Isolation</div><div class="num">12<small>/20</small></div><div class="sub">beds free</div></div>
+      <div class="board-cell tight"><div class="dept">Oxygen-supported</div><div class="num">9<small>/45</small></div><div class="sub">beds free</div></div>
+      <div class="board-cell ok"><div class="dept">Blood units (O+)</div><div class="num">42</div><div class="sub">units in stock</div></div>
+      <div class="board-cell ok"><div class="dept">Ambulances</div><div class="num">5<small>/8</small></div><div class="sub">available now</div></div>
+    </div>
+  </div>
+  <p class="scr-sub" style="margin-top:14px;">Colour code: <b style="color:var(--green)">green</b> = comfortable availability, <b style="color:#946C0B">amber</b> = limited, <b style="color:var(--red)">red</b> = near-full. Same feed powers the ORS public portal and can be pushed to the state dashboard.</p>
+`);
+
+/* ============== TELEMEDICINE (eSANJEEVANI) ============== */
+registerScreen('telemedicine', () => `
+  ${tag('Role: telemedicine coordinator')}
+  <h1 class="scr">Telemedicine (eSanjeevani-style)</h1>
+  <p class="scr-sub">Tele-consultation for outreach patients and PHC referrals, integrated with EMR & ABHA.</p>
+  <div class="grid kpis">
+    ${kpi('teal','bi-camera-video','9%',true,'46','Consultations today')}
+    ${kpi('blue','bi-hourglass-split','',false,'6 min','Avg. patient wait time')}
+    ${kpi('green','bi-person-check','',true,'8','Doctors online now')}
+    ${kpi('amber','bi-wifi','',false,'Good','Network quality')}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Consultation queue</h3></div>
+    <table>
+      <thead><tr><th>Patient</th><th>Referred from</th><th>Mode</th><th>Doctor</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><div class="tname"><span class="av">SK</span>S. Kale</div></td><td>PHC Trimbakeshwar</td><td><i class="bi bi-camera-video"></i> Video</td><td>Dr. Adarsh</td><td>${status('blue','In consultation')}</td></tr>
+        <tr><td><div class="tname"><span class="av">MP</span>M. Patil</div></td><td>PHC Deolali</td><td><i class="bi bi-telephone"></i> Audio</td><td>Dr. Sane</td><td>${status('amber','Waiting: 4 min')}</td></tr>
+        <tr><td><div class="tname"><span class="av">RJ</span>R. Jadhav</div></td><td>Sub-centre Sinnar</td><td><i class="bi bi-camera-video"></i> Video</td><td>Dr. Iyer</td><td>${status('gray','Queued')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== NATIONAL HEALTH PROGRAMMES ============== */
+registerScreen('programs', () => `
+  ${tag('Role: RMNCH+A / programme officer')}
+  <h1 class="scr">National health programmes</h1>
+  <p class="scr-sub">Facility-level reporting that feeds central programme dashboards: Nikshay (TB), U-WIN (immunisation) and RCH.</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>TB programme (Nikshay)</h3></div>
+      <div class="mini-stat"><span class="l">Cases notified this month</span><span class="v">31</span></div>
+      <div class="mini-stat"><span class="l">On DOTS treatment</span><span class="v">118</span></div>
+      <div class="mini-stat"><span class="l">Treatment success rate</span><span class="v">89%</span></div>
+      <div class="progress"><div style="width:89%"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Immunisation (U-WIN)</h3></div>
+      <div class="mini-stat"><span class="l">Doses administered today</span><span class="v">212</span></div>
+      <div class="mini-stat"><span class="l">Full immunisation coverage</span><span class="v">93%</span></div>
+      <div class="progress"><div style="width:93%"></div></div>
+      <div class="mini-stat" style="margin-top:12px;"><span class="l">Cold-chain status</span>${status('green','All units OK')}</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <div class="card-head"><h3>Reproductive & child health (RCH)</h3></div>
+    <div class="mini-stat"><span class="l">ANC registrations this month</span><span class="v">64</span></div>
+    <div class="mini-stat"><span class="l">Institutional deliveries</span><span class="v">51</span></div>
+    <div class="mini-stat"><span class="l">High-risk pregnancies flagged</span><span class="v">7</span></div>
+  </div>
+`);
+
+/* ============== GRIEVANCE REDRESSAL (CPGRAMS) ============== */
+registerScreen('grievance', () => `
+  ${tag('Role: public grievance officer')}
+  <h1 class="scr">Grievance redressal (CPGRAMS-linked)</h1>
+  <p class="scr-sub">Patient & citizen complaints routed to departments, with turnaround-time (TAT) tracking as mandated for government facilities.</p>
+  <div class="grid kpis">
+    ${kpi('blue','bi-inbox','',true,'19','Grievances received: this month')}
+    ${kpi('green','bi-check-circle','',true,'14','Resolved')}
+    ${kpi('red','bi-exclamation-circle','',false,'3','Pending beyond 7 days')}
+    ${kpi('teal','bi-stopwatch','',true,'4.2 days','Average TAT')}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Recent grievances</h3></div>
+    <table>
+      <thead><tr><th>Ref. no.</th><th>Category</th><th>Raised by</th><th>Days open</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>GRV-2201</td><td>Long OPD wait time</td><td>Walk-in patient</td><td>2</td><td>${status('blue','Under review')}</td></tr>
+        <tr><td>GRV-2198</td><td>Billing discrepancy</td><td>R. Pawar</td><td>9</td><td>${status('red','Overdue')}</td></tr>
+        <tr><td>GRV-2195</td><td>Staff behaviour</td><td>Anonymous</td><td>5</td><td>${status('amber','Escalated to HOD')}</td></tr>
+        <tr><td>GRV-2190</td><td>Cleanliness: Ward 3B</td><td>Attendant</td><td>1</td><td>${status('green','Resolved')}</td></tr>
+      </tbody>
+    </table>
   </div>
 `);
 
