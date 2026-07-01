@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SwasthyaCore — Hospital Management & HRMS Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --navy:#0B2545; --navy2:#13335C; --teal:#0E9C8C; --teal-d:#0A7567;
+    --ink:#0F172A; --ink-soft:#5B6B82; --ink-faint:#8C9AAE;
+    --line:#E4E9F0; --line-soft:#EEF2F7; --paper:#F4F6FA; --panel:#FFFFFF;
+    --amber:#E5A331; --red:#D9534F; --blue:#3B6FE0; --green:#2FA66A;
+    --tealtint:#E6F7F4; --bluetint:#EBF1FE; --ambertint:#FBF1DF; --redtint:#FBEAEA; --greentint:#E9F7EF;
+    --radius:10px; --shadow:0 1px 2px rgba(15,23,42,.04), 0 4px 16px rgba(15,23,42,.04);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Inter',-apple-system,sans-serif; background:var(--paper); color:var(--ink); font-size:14px;}
+  .app{display:flex; min-height:100vh;}
+
+  /* ===== SIDEBAR ===== */
+  .sidebar{
+    width:252px; background:var(--navy); color:#fff; flex-shrink:0;
+    display:flex; flex-direction:column; height:100vh; position:sticky; top:0;
+  }
+  .sb-brand{
+    display:flex; align-items:center; gap:10px; padding:18px 18px 14px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .sb-brand .mark{
+    width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,var(--teal),#0B7A6E);
+    display:flex; align-items:center; justify-content:center; font-family:'Manrope'; font-weight:800; font-size:15px; flex-shrink:0;
+  }
+  .sb-brand .name{font-family:'Manrope'; font-weight:800; font-size:15.5px; line-height:1.1;}
+  .sb-brand .sub{font-size:10.5px; color:rgba(255,255,255,.5); margin-top:2px; letter-spacing:.02em;}
+  .sb-search{padding:12px 14px;}
+  .sb-search .box{
+    display:flex; align-items:center; gap:7px; background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:7px 10px; color:rgba(255,255,255,.45); font-size:12.5px;
+  }
+  .sb-scroll{flex:1; overflow-y:auto; padding:4px 10px 14px;}
+  .sb-scroll::-webkit-scrollbar{width:5px;}
+  .sb-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15); border-radius:4px;}
+  .sb-group{margin-top:14px;}
+  .sb-group-label{
+    font-size:10px; text-transform:uppercase; letter-spacing:.08em; font-weight:700;
+    color:rgba(255,255,255,.35); padding:0 10px 6px;
+  }
+  .sb-item{
+    display:flex; align-items:center; gap:10px; padding:8.5px 10px; border-radius:7px;
+    color:rgba(255,255,255,.72); font-size:13px; cursor:pointer; margin-bottom:1px; position:relative;
+  }
+  .sb-item i{font-size:15px; width:16px; text-align:center; flex-shrink:0; color:rgba(255,255,255,.45);}
+  .sb-item:hover{background:rgba(255,255,255,.06); color:#fff;}
+  .sb-item.active{background:var(--teal); color:#fff; font-weight:600;}
+  .sb-item.active i{color:#fff;}
+  .sb-item .badge{
+    margin-left:auto; font-size:9.5px; background:rgba(255,255,255,.14); padding:1px 6px; border-radius:8px; font-weight:700;
+  }
+  .sb-item.active .badge{background:rgba(255,255,255,.25);}
+  .sb-foot{padding:12px 16px; border-top:1px solid rgba(255,255,255,.08); font-size:10.5px; color:rgba(255,255,255,.4);}
+
+  /* ===== MAIN ===== */
+  .main{flex:1; min-width:0; display:flex; flex-direction:column;}
+  .topbar{
+    height:60px; background:var(--panel); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between; padding:0 22px; position:sticky; top:0; z-index:5;
+  }
+  .crumb{font-size:11px; color:var(--ink-faint); margin-bottom:2px;}
+  .crumb b{color:var(--ink-soft); font-weight:600;}
+  .topbar-title{font-family:'Manrope'; font-weight:800; font-size:17px;}
+  .topbar-right{display:flex; align-items:center; gap:16px;}
+  .tb-search{
+    display:flex; align-items:center; gap:7px; background:var(--paper); border:1px solid var(--line);
+    border-radius:8px; padding:7px 12px; font-size:12.5px; color:var(--ink-faint); width:240px;
+  }
+  .tb-icon{
+    width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--line); color:var(--ink-soft); position:relative; cursor:pointer; flex-shrink:0;
+  }
+  .tb-icon .dot{position:absolute; top:6px; right:7px; width:6px; height:6px; border-radius:50%; background:var(--red); border:1.5px solid #fff;}
+  .tb-profile{display:flex; align-items:center; gap:9px; padding-left:14px; border-left:1px solid var(--line);}
+  .avatar{
+    width:34px; height:34px; border-radius:50%; background:var(--bluetint); color:var(--blue);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12.5px; flex-shrink:0;
+  }
+  .tb-profile .who{font-size:12.5px; font-weight:600; line-height:1.2;}
+  .tb-profile .role{font-size:10.5px; color:var(--ink-faint);}
+
+  .content{padding:22px 26px 60px; max-width:1280px;}
+  .screen{display:none;}
+  .screen.active{display:block; animation:fade .15s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:none;}}
+
+  .module-tag{
+    display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--teal-d);
+    background:var(--tealtint); padding:4px 10px; border-radius:20px; margin-bottom:10px;
+  }
+  h1.scr{font-family:'Manrope'; font-weight:800; font-size:21px; margin:0 0 3px;}
+  p.scr-sub{margin:0 0 20px; font-size:13px; color:var(--ink-soft);}
+
+  /* ===== shared widgets ===== */
+  .grid{display:grid; gap:16px;}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:16px 18px;
+  }
+  .card-head{display:flex; align-items:center; justify-content:between; justify-content:space-between; margin-bottom:12px;}
+  .card-head h3{font-size:13.5px; font-weight:700; margin:0;}
+  .card-head .more{font-size:11.5px; color:var(--teal-d); font-weight:600; cursor:pointer;}
+
+  .kpis{grid-template-columns:repeat(4,1fr); margin-bottom:18px;}
+  .kpi{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px;
+    box-shadow:var(--shadow); position:relative; overflow:hidden;
+  }
+  .kpi .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .kpi .ico{width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px;}
+  .kpi .ico.blue{background:var(--bluetint); color:var(--blue);}
+  .kpi .ico.teal{background:var(--tealtint); color:var(--teal-d);}
+  .kpi .ico.amber{background:var(--ambertint); color:var(--amber);}
+  .kpi .ico.red{background:var(--redtint); color:var(--red);}
+  .kpi .ico.green{background:var(--greentint); color:var(--green);}
+  .kpi .delta{font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:10px;}
+  .kpi .delta.up{background:var(--greentint); color:var(--green);}
+  .kpi .delta.down{background:var(--redtint); color:var(--red);}
+  .kpi .n{font-family:'Manrope'; font-weight:800; font-size:24px; line-height:1;}
+  .kpi .l{font-size:11.5px; color:var(--ink-soft); margin-top:5px;}
+
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  thead th{
+    text-align:left; padding:9px 10px; color:var(--ink-faint); font-weight:700; font-size:10.5px;
+    text-transform:uppercase; letter-spacing:.04em; border-bottom:1.5px solid var(--line);
+  }
+  tbody td{padding:10px 10px; border-bottom:1px solid var(--line-soft); color:var(--ink); vertical-align:middle;}
+  tbody tr:hover{background:var(--paper);}
+  .tname{display:flex; align-items:center; gap:9px;}
+  .tname .av{width:26px;height:26px;border-radius:50%;background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ink-soft);flex-shrink:0;}
+  .tname .meta{font-size:11px; color:var(--ink-faint);}
+
+  .status{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px;}
+  .status.green{background:var(--greentint); color:var(--green);}
+  .status.amber{background:var(--ambertint); color:#946C0B;}
+  .status.red{background:var(--redtint); color:var(--red);}
+  .status.blue{background:var(--bluetint); color:var(--blue);}
+  .status.gray{background:var(--line-soft); color:var(--ink-soft);}
+  .status .d{width:6px; height:6px; border-radius:50%; background:currentColor;}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:8px;
+    padding:8px 14px; font-size:12.5px; font-weight:600; cursor:pointer; background:#fff; color:var(--ink);
+  }
+  .btn:hover{border-color:var(--ink-faint);}
+  .btn.primary{background:var(--teal); color:#fff; border-color:var(--teal);}
+  .btn.primary:hover{background:var(--teal-d);}
+  .btn.navy{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .btn.sm{padding:5px 10px; font-size:11.5px;}
+
+  .label{font-size:11px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; display:block;}
+  .field{
+    width:100%; border:1px solid var(--line); border-radius:8px; padding:9px 11px; font-size:12.5px;
+    color:var(--ink); margin-bottom:12px; background:#fff; font-family:inherit;
+  }
+  .field::placeholder{color:var(--ink-faint);}
+  .field-row{display:flex; gap:10px;}
+  .field-row .field{flex:1;}
+
+  .tabbar{display:flex; gap:2px; border-bottom:1.5px solid var(--line); margin-bottom:18px;}
+  .tabbar .t{
+    font-size:12.5px; font-weight:600; padding:9px 14px; color:var(--ink-faint); cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1.5px;
+  }
+  .tabbar .t.on{color:var(--teal-d); border-bottom-color:var(--teal);}
+
+  .progress{height:6px; background:var(--line-soft); border-radius:4px; overflow:hidden; margin-top:6px;}
+  .progress > div{height:100%; background:var(--teal); border-radius:4px;}
+
+  .bedgrid{display:grid; grid-template-columns:repeat(10,1fr); gap:7px;}
+  .bed{
+    aspect-ratio:1; border-radius:7px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:9.5px; font-weight:700; border:1px solid var(--line); cursor:pointer; gap:1px;
+  }
+  .bed i{font-size:13px;}
+  .bed.free{background:var(--greentint); color:var(--green); border-color:#cfeedb;}
+  .bed.occ{background:var(--bluetint); color:var(--blue); border-color:#d6e3fc;}
+  .bed.crit{background:var(--redtint); color:var(--red); border-color:#f6cfcf;}
+  .bed.clean{background:var(--ambertint); color:#946C0B; border-color:#f3e3bd;}
+
+  .legend{display:flex; gap:16px; margin-top:12px; font-size:11.5px; color:var(--ink-soft); flex-wrap:wrap;}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend i{width:10px; height:10px; border-radius:3px; display:inline-block;}
+
+  .twocol{display:grid; grid-template-columns:1.55fr 1fr; gap:16px; align-items:start;}
+  .twocol-r{display:grid; grid-template-columns:1fr 1.55fr; gap:16px; align-items:start;}
+
+  .doc-card{display:flex; gap:11px; align-items:center; padding:11px; border:1px solid var(--line); border-radius:9px; margin-bottom:9px;}
+  .doc-card .av{width:38px;height:38px;border-radius:9px;background:var(--bluetint);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  .doc-card .info{flex:1; min-width:0;}
+  .doc-card .info .n{font-weight:600; font-size:12.5px;}
+  .doc-card .info .s{font-size:11px; color:var(--ink-faint);}
+
+  .mini-stat{display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px dashed var(--line);}
+  .mini-stat:last-child{border-bottom:none;}
+  .mini-stat .l{font-size:12px; color:var(--ink-soft);}
+  .mini-stat .v{font-size:12.5px; font-weight:700;}
+
+  .module-grid{grid-template-columns:repeat(3,1fr);}
+  .module-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px;
+    box-shadow:var(--shadow); cursor:pointer;
+  }
+  .module-card:hover{border-color:var(--teal);}
+  .module-card .ico{width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; margin-bottom:10px;}
+  .module-card .t{font-weight:700; font-size:13px; margin-bottom:3px;}
+  .module-card .d{font-size:11.5px; color:var(--ink-faint); line-height:1.5;}
+  .module-card .phase{display:inline-block; margin-top:9px; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;}
+
+  .alert{display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:9px; font-size:12px; margin-bottom:8px;}
+  .alert.amber{background:var(--ambertint); color:#7A5A09;}
+  .alert.red{background:var(--redtint); color:#A33;}
+  .alert.blue{background:var(--bluetint); color:#2456C9;}
+  .alert i{margin-top:1px;}
+
+  .chartwrap{height:230px; position:relative;}
+  .chartwrap.sm{height:160px;}
+
+  .empty-note{
+    border:1.5px dashed var(--line); border-radius:9px; padding:24px; text-align:center; color:var(--ink-faint); font-size:12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="mark">SC</div>
+      <div>
+        <div class="name">SwasthyaCore</div>
+        <div class="sub">Govt. Hospital Suite</div>
+      </div>
+    </div>
+    <div class="sb-search">
+      <div class="box"><i class="bi bi-search"></i> Search modules, patients...</div>
+    </div>
+    <div class="sb-scroll" id="navScroll"></div>
+    <div class="sb-foot">GMH Nashik &nbsp;·&nbsp; v0.3 prototype</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="crumb">Hospital ops <i class="bi bi-chevron-right" style="font-size:8px;"></i> <b id="crumbNow">Dashboard</b></div>
+        <div class="topbar-title" id="titleNow">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="tb-search"><i class="bi bi-search"></i> Quick search...</div>
+        <div class="tb-icon"><i class="bi bi-bell"></i><span class="dot"></span></div>
+        <div class="tb-icon"><i class="bi bi-question-circle"></i></div>
+        <div class="tb-profile">
+          <div class="avatar">RS</div>
+          <div>
+            <div class="who">Dr. R. Sawant</div>
+            <div class="role">Medical Superintendent</div>
+          </div>
+          <i class="bi bi-chevron-down" style="font-size:10px;color:var(--ink-faint);"></i>
+        </div>
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<script>
+/* ============== NAV CONFIG ============== */
+const NAV = [
+  {group:'Overview', items:[
+    {id:'dashboard', label:'Dashboard', icon:'bi-grid-1x2'},
+    {id:'modulemap', label:'All modules', icon:'bi-diagram-3', badge:'28'},
+  ]},
+  {group:'Outpatient', items:[
+    {id:'registration', label:'Registration & ABHA', icon:'bi-person-vcard'},
+    {id:'opd', label:'OPD queue & appointments', icon:'bi-calendar2-check'},
+    {id:'emr', label:'EMR / case papers', icon:'bi-file-earmark-medical'},
+  ]},
+  {group:'Inpatient', items:[
+    {id:'ipd', label:'IPD & ward / bed mgmt', icon:'bi-hospital'},
+    {id:'ot', label:'Operation theatre', icon:'bi-scissors'},
+    {id:'emergency', label:'Emergency / casualty', icon:'bi-activity'},
+  ]},
+  {group:'Diagnostics & pharmacy', items:[
+    {id:'pharmacy', label:'Pharmacy', icon:'bi-capsule'},
+    {id:'lab', label:'Laboratory (LIS)', icon:'bi-droplet-half'},
+    {id:'radiology', label:'Radiology (RIS)', icon:'bi-radioactive'},
+    {id:'bloodbank', label:'Blood bank', icon:'bi-heart-pulse'},
+  ]},
+  {group:'HR & payroll (HRMS)', items:[
+    {id:'employees', label:'Employee directory', icon:'bi-people'},
+    {id:'attendance', label:'Attendance & roster', icon:'bi-calendar3'},
+    {id:'leave', label:'Leave management', icon:'bi-airplane'},
+    {id:'payroll', label:'Payroll run', icon:'bi-cash-coin'},
+    {id:'recruitment', label:'Recruitment & training', icon:'bi-mortarboard'},
+  ]},
+  {group:'Finance & admin', items:[
+    {id:'billing', label:'Billing & invoicing', icon:'bi-receipt'},
+    {id:'claims', label:'Insurance & scheme claims', icon:'bi-shield-check'},
+    {id:'inventory', label:'Inventory & assets', icon:'bi-box-seam'},
+    {id:'accounts', label:'Accounts & finance', icon:'bi-bank'},
+    {id:'support', label:'Support services', icon:'bi-truck'},
+  ]},
+  {group:'Compliance & reports', items:[
+    {id:'abdm', label:'ABDM / ABHA centre', icon:'bi-shield-lock'},
+    {id:'mrd', label:'Medical records (MRD)', icon:'bi-archive'},
+    {id:'nabh', label:'NABH checklist', icon:'bi-patch-check'},
+    {id:'reports', label:'Reports & analytics', icon:'bi-bar-chart-line'},
+  ]},
+  {group:'System', items:[
+    {id:'roles', label:'Roles & access control', icon:'bi-shield-lock-fill'},
+    {id:'portal', label:'Patient portal (phase 4)', icon:'bi-phone'},
+  ]},
+];
+
+const navScroll = document.getElementById('navScroll');
+NAV.forEach(g => {
+  const gd = document.createElement('div'); gd.className = 'sb-group';
+  gd.innerHTML = `<div class="sb-group-label">${g.group}</div>`;
+  g.items.forEach(it => {
+    const el = document.createElement('div');
+    el.className = 'sb-item'; el.id = 'nav-' + it.id;
+    el.innerHTML = `<i class="bi ${it.icon}"></i><span>${it.label}</span>${it.badge ? `<span class="badge">${it.badge}</span>` : ''}`;
+    el.onclick = () => show(it.id, it.label);
+    gd.appendChild(el);
+  });
+  navScroll.appendChild(gd);
+});
+
+const content = document.getElementById('content');
+const BUILDERS = {};
+function registerScreen(id, fn){ BUILDERS[id] = fn; }
+
+function show(id, label){
+  document.querySelectorAll('.sb-item').forEach(e => e.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + id);
+  if(navEl) navEl.classList.add('active');
+  document.getElementById('crumbNow').textContent = label || id;
+  document.getElementById('titleNow').textContent = label || id;
+  document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
+  let scr = document.getElementById('scr-' + id);
+  if(!scr){
+    scr = document.createElement('div');
+    scr.className = 'screen'; scr.id = 'scr-' + id;
+    scr.innerHTML = BUILDERS[id] ? BUILDERS[id]() : placeholder(label);
+    content.appendChild(scr);
+    if(window['init_'+id]) requestAnimationFrame(window['init_'+id]);
+  }
+  scr.classList.add('active');
+}
+
+function placeholder(label){
+  return `<div class="module-tag"><i class="bi bi-cone-striped"></i> Wireframe stub</div>
+  <h1 class="scr">${label}</h1>
+  <p class="scr-sub">Screen layout to be detailed in the next design pass — included in module list for completeness.</p>
+  <div class="empty-note">Low-priority for first clickable prototype. Structure follows the same card/table pattern as the screens already built out.</div>`;
+}
+
+function tag(text){return `<div class="module-tag"><i class="bi bi-stars"></i> ${text}</div>`;}
+function kpi(icoClass,icon,delta,deltaUp,n,l){
+  return `<div class="kpi"><div class="top"><div class="ico ${icoClass}"><i class="bi ${icon}"></i></div>
+  ${delta? `<div class="delta ${deltaUp?'up':'down'}">${deltaUp?'▲':'▼'} ${delta}</div>`:''}</div>
+  <div class="n">${n}</div><div class="l">${l}</div></div>`;
+}
+function status(color,text){return `<span class="status ${color}"><span class="d"></span>${text}</span>`;}
+
+/* ============== DASHBOARD ============== */
+registerScreen('dashboard', () => `
+  ${tag('Role: medical superintendent')}
+  <h1 class="scr">Good morning, Dr. Sawant</h1>
+  <p class="scr-sub">Cross-department snapshot across all 28 modules — General Medical Hospital, Nashik · Tuesday, 30 Jun</p>
+
+  <div class="grid kpis">
+    ${kpi('blue','bi-hospital','3%',true,'412 / 500','Beds occupied today')}
+    ${kpi('teal','bi-calendar2-check','12%',true,'186','OPD footfall today')}
+    ${kpi('amber','bi-people','2%',false,'94%','Staff attendance')}
+    ${kpi('red','bi-shield-check','5%',true,'23','Scheme claims pending')}
+  </div>
+
+  <div class="grid twocol" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-head"><h3>OPD footfall — last 7 days</h3><span class="more">View report</span></div>
+      <div class="chartwrap"><canvas id="cFootfall"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Bed occupancy by ward</h3><span class="more">Ward board</span></div>
+      <div class="chartwrap"><canvas id="cBeds"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>Compliance & operations status</h3></div>
+      <div class="mini-stat"><span class="l">ABDM / ABHA linking rate</span><span class="v">71% of patients</span></div>
+      <div class="progress"><div style="width:71%"></div></div>
+      <div class="mini-stat" style="margin-top:12px;"><span class="l">HFR facility registration</span>${status('green','Active')}</div>
+      <div class="mini-stat"><span class="l">Payroll cycle — June</span>${status('amber','Processing')}</div>
+      <div class="mini-stat"><span class="l">NABH checklist completion</span><span class="v">62%</span></div>
+      <div class="mini-stat"><span class="l">Pharmacy stock-out risk</span>${status('red','6 items low')}</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Alerts</h3></div>
+      <div class="alert red"><i class="bi bi-exclamation-triangle-fill"></i> Ward 3B — 2 beds flagged critical, review needed</div>
+      <div class="alert amber"><i class="bi bi-droplet-half"></i> Pharmacy — Amoxicillin batch expiring in 12 days</div>
+      <div class="alert blue"><i class="bi bi-shield-check"></i> 23 PM-JAY claims awaiting pre-authorisation</div>
+      <div class="alert amber"><i class="bi bi-people"></i> 6 payroll records flagged for HR review</div>
+    </div>
+  </div>
+`);
+window.init_dashboard = () => {
+  const f = document.getElementById('cFootfall');
+  if(f) new Chart(f, {type:'line', data:{labels:['Wed','Thu','Fri','Sat','Sun','Mon','Tue'],
+    datasets:[{data:[150,162,171,98,80,179,186], borderColor:'#0E9C8C', backgroundColor:'rgba(14,156,140,.08)', fill:true, tension:.35, pointRadius:0, borderWidth:2}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{display:true, grid:{color:'#EEF2F7'}, ticks:{font:{size:10}}}, x:{grid:{display:false}, ticks:{font:{size:10}}}}}});
+  const b = document.getElementById('cBeds');
+  if(b) new Chart(b, {type:'bar', data:{labels:['Med','Surg','Ortho','Peds','ICU','Gyn'],
+    datasets:[{data:[88,95,70,60,98,77], backgroundColor:'#3B6FE0', borderRadius:5, maxBarThickness:26}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{max:100, grid:{color:'#EEF2F7'}, ticks:{font:{size:10}}}, x:{grid:{display:false}, ticks:{font:{size:10}}}}}});
+};
+
+/* ============== ALL MODULES MAP ============== */
+const MODULES = [
+  ['Patient registration & ABHA','bi-person-vcard','blue','1','registration'],
+  ['OPD management','bi-calendar2-check','teal','1','opd'],
+  ['EMR / digital case papers','bi-file-earmark-medical','blue','1','emr'],
+  ['IPD / ward management','bi-hospital','teal','2','ipd'],
+  ['Nursing station / MAR','bi-clipboard2-pulse','teal','2','ipd'],
+  ['Pharmacy management','bi-capsule','amber','2','pharmacy'],
+  ['Laboratory (LIS)','bi-droplet-half','red','2','lab'],
+  ['Radiology (RIS / PACS)','bi-radioactive','red','3','radiology'],
+  ['Operation theatre (OT)','bi-scissors','blue','3','ot'],
+  ['Blood bank','bi-heart-pulse','red','3','bloodbank'],
+  ['Emergency / casualty','bi-activity','red','3','emergency'],
+  ['Medical records dept (MRD)','bi-archive','teal','3','mrd'],
+  ['Employee master & service records','bi-people','blue','1','employees'],
+  ['Attendance & duty roster','bi-calendar3','teal','1','attendance'],
+  ['Payroll & salary processing','bi-cash-coin','amber','2','payroll'],
+  ['Leave management','bi-airplane','teal','2','leave'],
+  ['Recruitment & onboarding','bi-person-plus','blue','3','recruitment'],
+  ['Performance & CME training','bi-mortarboard','teal','3','recruitment'],
+  ['Pension & retirement benefits','bi-piggy-bank','amber','3','recruitment'],
+  ['Statutory compliance (PF/ESI/TDS)','bi-file-earmark-bar-graph','red','3','recruitment'],
+  ['Billing & invoicing','bi-receipt','amber','2','billing'],
+  ['Insurance & scheme claims','bi-shield-check','blue','2','claims'],
+  ['Inventory & asset management','bi-box-seam','teal','2','inventory'],
+  ['Accounts & finance','bi-bank','blue','3','accounts'],
+  ['Housekeeping & biomedical waste','bi-trash3','amber','3','support'],
+  ['Ambulance & transport','bi-truck','red','3','support'],
+  ['ABDM / ABHA integration','bi-shield-lock','teal','1','abdm'],
+  ['NABH compliance tracking','bi-patch-check','blue','3','nabh'],
+  ['Analytics & MIS reporting','bi-bar-chart-line','teal','3','reports'],
+  ['Patient portal / app','bi-phone','blue','4','portal'],
+];
+registerScreen('modulemap', () => `
+  ${tag('28 modules · 4-phase build plan')}
+  <h1 class="scr">All modules</h1>
+  <p class="scr-sub">Full module inventory researched against current HMS/HRMS standards and India's ABDM digital health mandate. Click any card to open its screen.</p>
+  <div class="grid module-grid">
+    ${MODULES.map(([t,icon,c,phase,target]) => {
+      const tints = {blue:'bluetint', teal:'tealtint', amber:'ambertint', red:'redtint'};
+      const cols = {blue:'#3B6FE0', teal:'#0E9C8C', amber:'#946C0B', red:'#D9534F'};
+      return `<div class="module-card" onclick="show('${target}','${t.replace(/'/g,"")}')">
+        <div class="ico" style="background:var(--${tints[c]});color:${cols[c]}"><i class="bi ${icon}"></i></div>
+        <div class="t">${t}</div>
+        <div class="d">Tap to open the working screen for this module.</div>
+        <span class="phase" style="background:var(--${tints[c]});color:${cols[c]}">Phase ${phase}</span>
+      </div>`;
+    }).join('')}
+  </div>
+`);
+
+/* ============== REGISTRATION ============== */
+registerScreen('registration', () => `
+  ${tag('Role: front-desk staff')}
+  <h1 class="scr">Patient registration & ABHA linking</h1>
+  <p class="scr-sub">New or returning patient intake with national health ID linking at the point of entry.</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>New patient</h3></div>
+      <div class="field-row"><input class="field" placeholder="Full name"><input class="field" placeholder="Age"></div>
+      <div class="field-row"><input class="field" placeholder="Gender"><input class="field" placeholder="Mobile number"></div>
+      <input class="field" placeholder="Address / village">
+      <div class="card" style="background:var(--tealtint); border-color:#cdeee8; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <i class="bi bi-qr-code-scan" style="font-size:22px; color:var(--teal-d);"></i>
+          <div style="flex:1;">
+            <div style="font-weight:700; font-size:12.5px;">Scan ABHA QR or verify by Aadhaar / mobile</div>
+            <div style="font-size:11px; color:var(--ink-soft);">Creates or links the patient's 14-digit Ayushman Bharat Health Account</div>
+          </div>
+          <button class="btn sm primary">Scan</button>
+        </div>
+      </div>
+      <select class="field"><option>Department — General medicine</option></select>
+      <button class="btn primary" style="width:100%; justify-content:center;">Register & issue OPD token</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Today's registrations</h3></div>
+      <table>
+        <thead><tr><th>Patient</th><th>ABHA</th><th>Dept.</th></tr></thead>
+        <tbody>
+          <tr><td><div class="tname"><div class="av">RP</div>R. Pawar</div></td><td>${status('green','Linked')}</td><td>Medicine</td></tr>
+          <tr><td><div class="tname"><div class="av">SK</div>S. Kale</div></td><td>${status('amber','Pending')}</td><td>Ortho</td></tr>
+          <tr><td><div class="tname"><div class="av">MI</div>M. Iyer</div></td><td>${status('green','Linked')}</td><td>Gynae</td></tr>
+          <tr><td><div class="tname"><div class="av">AD</div>A. Deshmukh</div></td><td>${status('gray','Not started')}</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+`);
+
+/* ============== OPD ============== */
+registerScreen('opd', () => `
+  ${tag('Role: front-desk · doctor')}
+  <h1 class="scr">OPD queue & appointments</h1>
+  <p class="scr-sub">Live token queue across departments, with doctor-wise scheduling.</p>
+  <div class="grid kpis">
+    ${kpi('teal','bi-calendar2-check','',true,'186','Tokens issued today')}
+    ${kpi('blue','bi-hourglass-split','',false,'14','Currently waiting')}
+    ${kpi('green','bi-check2-circle','',true,'142','Consultations done')}
+    ${kpi('amber','bi-clock-history','',false,'18 min','Avg. wait time')}
+  </div>
+  <div class="card">
+    <div class="tabbar">
+      <div class="t on">General medicine</div><div class="t">Orthopaedics</div><div class="t">Gynaecology</div><div class="t">Paediatrics</div><div class="t">ENT</div>
+    </div>
+    <table>
+      <thead><tr><th>Token</th><th>Patient</th><th>ABHA</th><th>Doctor</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>A-014</td><td><div class="tname"><div class="av">RP</div>R. Pawar · 42M</div></td><td>${status('green','Linked')}</td><td>Dr. A. Deshmukh</td><td>${status('blue','With doctor')}</td><td><span class="btn sm">View</span></td></tr>
+        <tr><td>A-015</td><td><div class="tname"><div class="av">SK</div>S. Kale · 35F</div></td><td>${status('amber','Not linked')}</td><td>Dr. A. Deshmukh</td><td>${status('amber','Waiting')}</td><td><span class="btn sm">View</span></td></tr>
+        <tr><td>A-016</td><td><div class="tname"><div class="av">MI</div>M. Iyer · 29F</div></td><td>${status('green','Linked')}</td><td>Dr. N. Bhosale</td><td>${status('amber','Waiting')}</td><td><span class="btn sm">View</span></td></tr>
+        <tr><td>A-017</td><td><div class="tname"><div class="av">+</div>New patient</td><td>—</td><td>Dr. N. Bhosale</td><td>${status('gray','Registering')}</td><td><span class="btn sm">View</span></td></tr>
+        <tr><td>A-018</td><td><div class="tname"><div class="av">PJ</div>P. Joshi · 58M</td><td>${status('green','Linked')}</td><td>Dr. A. Deshmukh</td><td>${status('green','Completed')}</td><td><span class="btn sm">View</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== EMR ============== */
+registerScreen('emr', () => `
+  ${tag('Role: doctor')}
+  <h1 class="scr">EMR / digital case paper</h1>
+  <p class="scr-sub">One continuous clinical record per patient — replaces the physical case sheet.</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="tabbar">
+        <div class="t on">Consultation</div><div class="t">Vitals</div><div class="t">Prescription</div><div class="t">Lab orders</div><div class="t">History</div>
+      </div>
+      <span class="label">Chief complaint</span>
+      <textarea class="field" rows="2" placeholder="Fever and joint pain since 3 days..."></textarea>
+      <span class="label">Clinical notes</span>
+      <textarea class="field" rows="4" placeholder="On examination..."></textarea>
+      <div class="field-row">
+        <div style="flex:1;"><span class="label">Diagnosis</span><input class="field" placeholder="ICD-coded diagnosis"></div>
+        <div style="flex:1;"><span class="label">Follow-up</span><input class="field" placeholder="Review after 7 days"></div>
+      </div>
+      <button class="btn">+ Add lab order</button>
+      <button class="btn">+ Add prescription</button>
+      <button class="btn primary" style="float:right;"><i class="bi bi-cloud-check"></i> Save & sync to ABHA record</button>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <div class="avatar" style="width:42px;height:42px;font-size:14px;">RP</div>
+          <div><div style="font-weight:700; font-size:13.5px;">R. Pawar</div><div style="font-size:11px; color:var(--ink-faint);">42 / Male · ABHA linked</div></div>
+        </div>
+        <div class="mini-stat"><span class="l">Blood group</span><span class="v">B+</span></div>
+        <div class="mini-stat"><span class="l">Known allergies</span><span class="v">Penicillin</span></div>
+        <div class="mini-stat"><span class="l">Chronic conditions</span><span class="v">Type 2 diabetes</span></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Visit history</h3></div>
+        <div class="mini-stat"><span class="l">12 Jun — General medicine</span><span class="v">Follow-up</span></div>
+        <div class="mini-stat"><span class="l">02 Apr — Laboratory</span><span class="v">Blood test</span></div>
+        <div class="mini-stat"><span class="l">19 Feb — Orthopaedics</span><span class="v">Consultation</span></div>
+      </div>
+    </div>
+  </div>
+`);
+
+/* ============== IPD ============== */
+registerScreen('ipd', () => {
+  const states = ['occ','occ','free','occ','crit','clean','occ','free','occ','occ'];
+  const beds = Array.from({length:30}).map((_,i)=>{
+    const st = states[i % states.length];
+    const icon = st==='free'?'bi-door-open':st==='crit'?'bi-heart-pulse-fill':st==='clean'?'bi-stars':'bi-person-fill';
+    const lbl = st==='free'?'Free':st==='crit'?'Critical':st==='clean'?'Cleaning':'Bed '+(i+1);
+    return `<div class="bed ${st}" title="Bed ${i+1}"><i class="bi ${icon}"></i>${lbl}</div>`;
+  }).join('');
+  return `
+  ${tag('Role: nurse / ward in-charge')}
+  <h1 class="scr">IPD & ward / bed management</h1>
+  <p class="scr-sub">Bed-level view, nursing station (MAR), and admission–discharge flow.</p>
+  <div class="grid kpis">
+    ${kpi('blue','bi-hospital','',true,'412/500','Beds occupied')}
+    ${kpi('green','bi-door-open','',false,'31','Beds free')}
+    ${kpi('red','bi-heart-pulse','',false,'9','Critical patients')}
+    ${kpi('amber','bi-arrow-left-right','',true,'27','Admissions today')}
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-head"><h3>Ward 3B — General surgery (30 beds)</h3><span class="more">Switch ward ▾</span></div>
+    <div class="bedgrid">${beds}</div>
+    <div class="legend">
+      <span><i style="background:var(--green)"></i>Free</span>
+      <span><i style="background:var(--blue)"></i>Occupied</span>
+      <span><i style="background:var(--red)"></i>Critical — review</span>
+      <span><i style="background:var(--amber)"></i>Cleaning / turnover</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Nursing station — medication administration record (Bed 4, R. Pawar)</h3></div>
+    <table>
+      <thead><tr><th>Time</th><th>Medication</th><th>Dose</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>08:00</td><td>Amoxicillin</td><td>500mg</td><td>${status('green','Given')}</td></tr>
+        <tr><td>14:00</td><td>Metformin</td><td>500mg</td><td>${status('amber','Due now')}</td></tr>
+        <tr><td>20:00</td><td>Paracetamol</td><td>650mg</td><td>${status('gray','Scheduled')}</td></tr>
+      </tbody>
+    </table>
+  </div>`;
+});
+
+/* ============== OT ============== */
+registerScreen('ot', () => `
+  ${tag('Role: OT in-charge · surgeon')}
+  <h1 class="scr">Operation theatre management</h1>
+  <p class="scr-sub">Surgery scheduling, theatre utilisation, and surgical/anaesthesia records.</p>
+  <div class="grid kpis">
+    ${kpi('blue','bi-scissors','',true,'7','Surgeries scheduled today')}
+    ${kpi('teal','bi-check2-circle','',true,'4','Completed')}
+    ${kpi('amber','bi-hourglass-split','',false,'2','In progress')}
+    ${kpi('green','bi-speedometer2','',true,'82%','OT utilisation rate')}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Theatre schedule — today</h3></div>
+    <table>
+      <thead><tr><th>OT</th><th>Time</th><th>Patient</th><th>Procedure</th><th>Surgeon</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>OT-1</td><td>08:30 – 10:00</td><td>R. Pawar</td><td>Appendectomy</td><td>Dr. Kale</td><td>${status('green','Completed')}</td></tr>
+        <tr><td>OT-2</td><td>09:00 – 11:30</td><td>S. Naik</td><td>Knee arthroscopy</td><td>Dr. Bhosale</td><td>${status('blue','In progress')}</td></tr>
+        <tr><td>OT-1</td><td>11:00 – 12:00</td><td>M. Iyer</td><td>D&C</td><td>Dr. Kale</td><td>${status('amber','Prepping')}</td></tr>
+        <tr><td>OT-3</td><td>14:00 – 16:00</td><td>A. Deshmukh</td><td>Hernia repair</td><td>Dr. Joshi</td><td>${status('gray','Scheduled')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== EMERGENCY ============== */
+registerScreen('emergency', () => `
+  ${tag('Role: casualty staff')}
+  <h1 class="scr">Emergency / casualty</h1>
+  <p class="scr-sub">Rapid triage and registration for critical / unscheduled arrivals.</p>
+  <div class="grid twocol-r">
+    <div class="card">
+      <div class="card-head"><h3>Triage</h3></div>
+      <span class="label">Severity</span>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <span class="status red" style="padding:7px 12px;">Critical</span>
+        <span class="status amber" style="padding:7px 12px;">Urgent</span>
+        <span class="status green" style="padding:7px 12px;">Stable</span>
+      </div>
+      <input class="field" placeholder="Patient name / unknown">
+      <input class="field" placeholder="Presenting complaint">
+      <button class="btn primary" style="width:100%; justify-content:center;">Admit to casualty</button>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Active casualty cases</h3></div>
+      <table>
+        <thead><tr><th>Patient</th><th>Complaint</th><th>Severity</th><th>Time in</th></tr></thead>
+        <tbody>
+          <tr><td>Unknown male, ~30</td><td>Road traffic accident</td><td>${status('red','Critical')}</td><td>11 min ago</td></tr>
+          <tr><td>K. Shaikh</td><td>Chest pain</td><td>${status('red','Critical')}</td><td>24 min ago</td></tr>
+          <tr><td>V. Rane</td><td>Fracture — forearm</td><td>${status('amber','Urgent')}</td><td>40 min ago</td></tr>
+          <tr><td>T. Gupta</td><td>High fever</td><td>${status('green','Stable')}</td><td>1 hr ago</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+`);
+
+/* ============== PHARMACY ============== */
+registerScreen('pharmacy', () => `
+  ${tag('Role: pharmacist')}
+  <h1 class="scr">Pharmacy management</h1>
+  <p class="scr-sub">Dispensing against e-prescriptions, stock, batch and expiry tracking.</p>
+  <div class="grid kpis">
+    ${kpi('teal','bi-capsule','',true,'318','Items dispensed today')}
+    ${kpi('amber','bi-exclamation-circle','',false,'6','Low-stock alerts')}
+    ${kpi('red','bi-calendar-x','',false,'3','Batches expiring < 30 days')}
+    ${kpi('blue','bi-box-seam','',true,'1,204','SKUs in central store')}
+  </div>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>Dispensing queue — from EMR prescriptions</h3></div>
+      <table>
+        <thead><tr><th>Patient</th><th>Drug</th><th>Stock</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>R. Pawar</td><td>Amoxicillin 500mg</td><td>${status('green','In stock')}</td><td><span class="btn sm primary">Dispense</span></td></tr>
+          <tr><td>S. Kale</td><td>Metformin 500mg</td><td>${status('amber','Low stock')}</td><td><span class="btn sm">Substitute</span></td></tr>
+          <tr><td>M. Iyer</td><td>Folic acid</td><td>${status('green','In stock')}</td><td><span class="btn sm primary">Dispense</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Expiry watch</h3></div>
+      <div class="mini-stat"><span class="l">Amoxicillin — batch AX221</span><span class="v" style="color:var(--red)">12 days</span></div>
+      <div class="mini-stat"><span class="l">Insulin — batch IN087</span><span class="v" style="color:var(--amber)">24 days</span></div>
+      <div class="mini-stat"><span class="l">ORS sachets — batch OR410</span><span class="v" style="color:var(--amber)">29 days</span></div>
+    </div>
+  </div>
+`);
+
+/* ============== LAB ============== */
+registerScreen('lab', () => `
+  ${tag('Role: lab technician')}
+  <h1 class="scr">Laboratory information system (LIS)</h1>
+  <p class="scr-sub">Test orders, sample tracking, and report generation.</p>
+  <div class="card">
+    <div class="tabbar"><div class="t on">Pending samples</div><div class="t">In progress</div><div class="t">Reports ready</div></div>
+    <table>
+      <thead><tr><th>Patient</th><th>Test</th><th>Ordered by</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>M. Iyer</td><td>CBC</td><td>Dr. Bhosale</td><td>${status('amber','Sample collected')}</td><td><span class="btn sm">Update</span></td></tr>
+        <tr><td>R. Pawar</td><td>Blood glucose</td><td>Dr. Deshmukh</td><td>${status('green','Report ready')}</td><td><span class="btn sm">View report</span></td></tr>
+        <tr><td>S. Kale</td><td>Lipid profile</td><td>Dr. Deshmukh</td><td>${status('blue','Processing')}</td><td><span class="btn sm">Update</span></td></tr>
+        <tr><td>A. Deshmukh</td><td>Liver function test</td><td>Dr. Joshi</td><td>${status('gray','Awaiting sample')}</td><td><span class="btn sm">Update</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== RADIOLOGY ============== */
+registerScreen('radiology', () => `
+  ${tag('Role: radiologist · technician')}
+  <h1 class="scr">Radiology (RIS / PACS)</h1>
+  <p class="scr-sub">Imaging orders, PACS viewer integration, report attachment.</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>Imaging queue</h3></div>
+      <table>
+        <thead><tr><th>Patient</th><th>Study</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>K. Shaikh</td><td>Chest X-ray</td><td>${status('amber','Awaiting scan')}</td></tr>
+          <tr><td>V. Rane</td><td>Forearm X-ray</td><td>${status('green','Reported')}</td></tr>
+          <tr><td>R. Pawar</td><td>Abdomen ultrasound</td><td>${status('blue','In progress')}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>PACS viewer</h3></div>
+      <div class="empty-note" style="height:180px; display:flex; align-items:center; justify-content:center;">
+        <div><i class="bi bi-image" style="font-size:28px;"></i><div style="margin-top:8px;">Image viewer panel (PACS-linked)</div></div>
+      </div>
+    </div>
+  </div>
+`);
+
+/* ============== BLOOD BANK ============== */
+registerScreen('bloodbank', () => `
+  ${tag('Role: blood bank in-charge')}
+  <h1 class="scr">Blood bank</h1>
+  <p class="scr-sub">Donor records, stock by blood group, issue and cross-match tracking.</p>
+  <div class="grid" style="grid-template-columns:repeat(8,1fr); margin-bottom:18px;">
+    ${['A+','A-','B+','B-','AB+','AB-','O+','O-'].map((bg,i)=>{
+      const units = [22,4,31,6,9,2,40,5][i];
+      const low = units < 8;
+      return `<div class="kpi" style="padding:12px;"><div class="n" style="font-size:19px;">${units}</div><div class="l">${bg} units ${low?'<span style="color:var(--red); font-weight:700;">· low</span>':''}</div></div>`;
+    }).join('')}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Recent issues</h3></div>
+    <table>
+      <thead><tr><th>Patient</th><th>Blood group</th><th>Units</th><th>Purpose</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Unknown male (RTA)</td><td>O-</td><td>2</td><td>Emergency transfusion</td><td>${status('green','Issued')}</td></tr>
+        <tr><td>R. Pawar</td><td>B+</td><td>1</td><td>Pre-surgical</td><td>${status('amber','Cross-match pending')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== EMPLOYEES ============== */
+registerScreen('employees', () => `
+  ${tag('Role: HR / admin office')}
+  <h1 class="scr">Employee directory & service records</h1>
+  <p class="scr-sub">Doctors, nurses, paramedical & support staff — postings, transfers, service history.</p>
+  <div class="grid kpis">
+    ${kpi('blue','bi-people','',true,'612','Total staff on roll')}
+    ${kpi('teal','bi-person-check','',false,'94%','Present today')}
+    ${kpi('amber','bi-person-dash','',false,'8','On leave today')}
+    ${kpi('green','bi-person-plus','',true,'3','New joiners this month')}
+  </div>
+  <div class="card">
+    <div class="tabbar"><div class="t on">All staff</div><div class="t">Doctors</div><div class="t">Nursing</div><div class="t">Paramedical</div><div class="t">Support staff</div></div>
+    <table>
+      <thead><tr><th>Emp ID</th><th>Name</th><th>Role</th><th>Department</th><th>Pay scale</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>EMP-2201</td><td><div class="tname"><div class="av">AD</div>Dr. A. Deshmukh</div></td><td>Consultant</td><td>Medicine</td><td>Level 11</td><td>${status('green','Present')}</td></tr>
+        <tr><td>EMP-2230</td><td><div class="tname"><div class="av">SN</div>S. Naik</div></td><td>Staff nurse</td><td>Ward 3B</td><td>Level 7</td><td>${status('green','Present')}</td></tr>
+        <tr><td>EMP-2291</td><td><div class="tname"><div class="av">PJ</div>P. Joshi</div></td><td>Pharmacist</td><td>Pharmacy</td><td>Level 6</td><td>${status('amber','On leave')}</td></tr>
+        <tr><td>EMP-2305</td><td><div class="tname"><div class="av">KS</div>K. Shaikh</div></td><td>Ward attendant</td><td>Ward 3B</td><td>Level 3</td><td>${status('green','Present')}</td></tr>
+        <tr><td>EMP-2318</td><td><div class="tname"><div class="av">NB</div>Dr. N. Bhosale</div></td><td>Consultant</td><td>Orthopaedics</td><td>Level 11</td><td>${status('green','Present')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== ATTENDANCE ============== */
+registerScreen('attendance', () => `
+  ${tag('Role: HR / admin office')}
+  <h1 class="scr">Attendance & duty roster</h1>
+  <p class="scr-sub">Biometric/manual attendance and shift roster across departments.</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>Duty roster — Ward 3B, this week</h3></div>
+      <table>
+        <thead><tr><th>Staff</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th></tr></thead>
+        <tbody>
+          <tr><td>S. Naik</td><td>${status('blue','Day')}</td><td>${status('blue','Day')}</td><td>${status('gray','Off')}</td><td>${status('amber','Night')}</td><td>${status('blue','Day')}</td></tr>
+          <tr><td>K. Shaikh</td><td>${status('amber','Night')}</td><td>${status('gray','Off')}</td><td>${status('blue','Day')}</td><td>${status('blue','Day')}</td><td>${status('amber','Night')}</td></tr>
+          <tr><td>R. Tambe</td><td>${status('blue','Day')}</td><td>${status('amber','Night')}</td><td>${status('blue','Day')}</td><td>${status('gray','Off')}</td><td>${status('blue','Day')}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Today's attendance</h3></div>
+      <div class="chartwrap sm"><canvas id="cAtt"></canvas></div>
+    </div>
+  </div>
+`);
+window.init_attendance = () => {
+  const el = document.getElementById('cAtt'); if(!el) return;
+  new Chart(el, {type:'doughnut', data:{labels:['Present','On leave','Absent'], datasets:[{data:[94,5,1], backgroundColor:['#0E9C8C','#E5A331','#D9534F'], borderWidth:0}]},
+  options:{cutout:'68%', plugins:{legend:{position:'bottom', labels:{boxWidth:9, font:{size:10.5}}}}}});
+};
+
+/* ============== LEAVE ============== */
+registerScreen('leave', () => `
+  ${tag('Role: HR / department head')}
+  <h1 class="scr">Leave management</h1>
+  <p class="scr-sub">Casual / earned / medical leave requests, approval workflow, balances.</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>Pending approvals</h3></div>
+      <table>
+        <thead><tr><th>Staff</th><th>Type</th><th>Dates</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>P. Joshi</td><td>Medical</td><td>28 Jun – 2 Jul</td><td><span class="btn sm primary">Approve</span> <span class="btn sm">Deny</span></td></tr>
+          <tr><td>R. Tambe</td><td>Casual</td><td>5 Jul</td><td><span class="btn sm primary">Approve</span> <span class="btn sm">Deny</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Leave balance — P. Joshi</h3></div>
+      <div class="mini-stat"><span class="l">Casual leave</span><span class="v">6 / 12</span></div>
+      <div class="mini-stat"><span class="l">Earned leave</span><span class="v">14 / 30</span></div>
+      <div class="mini-stat"><span class="l">Medical leave</span><span class="v">3 / 15</span></div>
+    </div>
+  </div>
+`);
+
+/* ============== PAYROLL ============== */
+registerScreen('payroll', () => `
+  ${tag('Role: HR / accounts')}
+  <h1 class="scr">Payroll run</h1>
+  <p class="scr-sub">Government pay-scale based monthly processing.</p>
+  <div class="grid kpis">
+    ${kpi('blue','bi-people','',false,'612','Staff in this run')}
+    ${kpi('teal','bi-cash-coin','',true,'₹38.6L','Gross payout (est.)')}
+    ${kpi('amber','bi-flag','',false,'6','Flagged for review')}
+    ${kpi('green','bi-calendar-check','',false,'30 Jun','Disbursal date')}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Run preview</h3></div>
+    <table>
+      <thead><tr><th>Emp ID</th><th>Name</th><th>Pay scale</th><th>Attendance</th><th>Net pay</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>EMP-2201</td><td>Dr. A. Deshmukh</td><td>Level 11</td><td>26/26</td><td>₹1,12,400</td><td>${status('green','Ready')}</td></tr>
+        <tr><td>EMP-2230</td><td>S. Naik</td><td>Level 7</td><td>24/26</td><td>₹54,200</td><td>${status('green','Ready')}</td></tr>
+        <tr><td>EMP-2291</td><td>P. Joshi</td><td>Level 6</td><td>20/26 (leave)</td><td>₹41,000</td><td>${status('amber','Review')}</td></tr>
+        <tr><td>EMP-2305</td><td>K. Shaikh</td><td>Level 3</td><td>26/26</td><td>₹28,750</td><td>${status('green','Ready')}</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;">
+      <button class="btn">Export bank file</button>
+      <button class="btn primary">Approve & process run</button>
+    </div>
+  </div>
+`);
+
+/* ============== RECRUITMENT ============== */
+registerScreen('recruitment', () => `
+  ${tag('Role: HR — recruitment, training, pension, statutory')}
+  <h1 class="scr">Recruitment, training & retirement workflows</h1>
+  <p class="scr-sub">Covers vacancy tracking, CME training credits, pension processing, and statutory compliance.</p>
+  <div class="tabbar">
+    <div class="t on">Recruitment</div><div class="t">Training / CME</div><div class="t">Pension</div><div class="t">Statutory (PF/ESI/TDS)</div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Open vacancies</h3></div>
+    <table>
+      <thead><tr><th>Position</th><th>Department</th><th>Applications</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Staff nurse (2 posts)</td><td>ICU</td><td>34</td><td>${status('blue','Shortlisting')}</td></tr>
+        <tr><td>Radiology technician</td><td>Radiology</td><td>11</td><td>${status('amber','Document verification')}</td></tr>
+        <tr><td>Junior resident — Medicine</td><td>Medicine</td><td>19</td><td>${status('green','Interview scheduled')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== BILLING ============== */
+registerScreen('billing', () => `
+  ${tag('Role: billing / accounts')}
+  <h1 class="scr">Billing & invoicing</h1>
+  <p class="scr-sub">OPD/IPD billing with fee waivers for government scheme patients.</p>
+  <div class="grid kpis">
+    ${kpi('teal','bi-receipt','',true,'₹2.4L','Billed today')}
+    ${kpi('blue','bi-shield-check','',false,'68%','Scheme-covered bills')}
+    ${kpi('amber','bi-hourglass-split','',false,'17','Pending payments')}
+    ${kpi('green','bi-check2-circle','',true,'231','Invoices generated')}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Recent invoices</h3></div>
+    <table>
+      <thead><tr><th>Invoice</th><th>Patient</th><th>Amount</th><th>Coverage</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>INV-10231</td><td>R. Pawar</td><td>₹3,200</td><td>PM-JAY</td><td>${status('green','Settled')}</td></tr>
+        <tr><td>INV-10232</td><td>S. Kale</td><td>₹850</td><td>Self-pay</td><td>${status('amber','Pending')}</td></tr>
+        <tr><td>INV-10233</td><td>M. Iyer</td><td>₹4,600</td><td>State scheme</td><td>${status('blue','Claim filed')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== CLAIMS ============== */
+registerScreen('claims', () => `
+  ${tag('Role: insurance desk')}
+  <h1 class="scr">Insurance & scheme claims</h1>
+  <p class="scr-sub">PM-JAY / state scheme pre-authorisation and NHCX-linked claim tracking.</p>
+  <div class="card">
+    <div class="card-head"><h3>Claims pipeline</h3></div>
+    <table>
+      <thead><tr><th>Patient</th><th>Scheme</th><th>Amount</th><th>Stage</th></tr></thead>
+      <tbody>
+        <tr><td>R. Pawar</td><td>PM-JAY</td><td>₹18,000</td><td>${status('green','Approved')}</td></tr>
+        <tr><td>M. Iyer</td><td>State health scheme</td><td>₹9,400</td><td>${status('blue','Pre-auth submitted')}</td></tr>
+        <tr><td>A. Deshmukh</td><td>PM-JAY</td><td>₹22,500</td><td>${status('amber','NHCX review')}</td></tr>
+        <tr><td>V. Rane</td><td>PM-JAY</td><td>₹6,100</td><td>${status('red','Documentation needed')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== INVENTORY ============== */
+registerScreen('inventory', () => `
+  ${tag('Role: stores in-charge')}
+  <h1 class="scr">Inventory & asset management</h1>
+  <p class="scr-sub">Central stores, consumables, equipment register, indent requests.</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>Indent requests</h3></div>
+      <table>
+        <thead><tr><th>Department</th><th>Item</th><th>Qty</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Ward 3B</td><td>IV cannulas</td><td>200</td><td>${status('amber','Pending approval')}</td></tr>
+          <tr><td>OT-2</td><td>Surgical gloves</td><td>500</td><td>${status('green','Approved')}</td></tr>
+          <tr><td>Lab</td><td>Test tubes</td><td>1000</td><td>${status('blue','Dispatched')}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Asset register</h3></div>
+      <div class="mini-stat"><span class="l">Ventilators</span><span class="v">14 active / 2 service</span></div>
+      <div class="mini-stat"><span class="l">ECG machines</span><span class="v">9 active</span></div>
+      <div class="mini-stat"><span class="l">X-ray machines</span><span class="v">3 active</span></div>
+    </div>
+  </div>
+`);
+
+/* ============== ACCOUNTS ============== */
+registerScreen('accounts', () => `
+  ${tag('Role: finance office')}
+  <h1 class="scr">Accounts & finance</h1>
+  <p class="scr-sub">Budget tracking, expenditure, and government audit-ready ledgers.</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>Budget utilisation — FY 2026-27</h3></div>
+      <div class="chartwrap sm"><canvas id="cBudget"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>This month</h3></div>
+      <div class="mini-stat"><span class="l">Total expenditure</span><span class="v">₹84.2L</span></div>
+      <div class="mini-stat"><span class="l">Salary & payroll</span><span class="v">₹38.6L</span></div>
+      <div class="mini-stat"><span class="l">Medical supplies</span><span class="v">₹22.1L</span></div>
+      <div class="mini-stat"><span class="l">Infrastructure & misc.</span><span class="v">₹23.5L</span></div>
+    </div>
+  </div>
+`);
+window.init_accounts = () => {
+  const el = document.getElementById('cBudget'); if(!el) return;
+  new Chart(el, {type:'bar', data:{labels:['Salaries','Supplies','Infra','Equipment','Other'],
+    datasets:[{data:[62,48,30,40,18], backgroundColor:'#0E9C8C', borderRadius:5, maxBarThickness:22}]},
+  options:{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{max:80, grid:{color:'#EEF2F7'}, ticks:{font:{size:10}}}, y:{grid:{display:false}, ticks:{font:{size:10.5}}}}}});
+};
+
+/* ============== SUPPORT SERVICES ============== */
+registerScreen('support', () => `
+  ${tag('Role: facilities / admin')}
+  <h1 class="scr">Support services</h1>
+  <p class="scr-sub">Housekeeping, biomedical waste, ambulance/transport, canteen & hostel (teaching hospitals).</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>Biomedical waste log</h3></div>
+      <table>
+        <thead><tr><th>Ward</th><th>Category</th><th>Weight</th><th>Disposed</th></tr></thead>
+        <tbody>
+          <tr><td>Ward 3B</td><td>Yellow (infectious)</td><td>12 kg</td><td>${status('green','Logged')}</td></tr>
+          <tr><td>OT block</td><td>Red (contaminated)</td><td>8 kg</td><td>${status('green','Logged')}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Ambulance fleet</h3></div>
+      <div class="mini-stat"><span class="l">AMB-01</span>${status('green','Available')}</div>
+      <div class="mini-stat"><span class="l">AMB-02</span>${status('blue','On dispatch')}</div>
+      <div class="mini-stat"><span class="l">AMB-03</span>${status('amber','Maintenance')}</div>
+    </div>
+  </div>
+`);
+
+/* ============== ABDM ============== */
+registerScreen('abdm', () => `
+  ${tag('Role: compliance officer')}
+  <h1 class="scr">ABDM / ABHA compliance centre</h1>
+  <p class="scr-sub">National digital health stack — facility, professional & patient-ID registries.</p>
+  <div class="grid kpis">
+    ${kpi('teal','bi-shield-check','',true,'71%','Patients ABHA-linked')}
+    ${kpi('blue','bi-building-check','',false,'Active','HFR facility status')}
+    ${kpi('green','bi-person-badge','',true,'94%','Staff on HPR registry')}
+    ${kpi('amber','bi-arrow-repeat','',false,'M2','Current ABDM milestone')}
+  </div>
+  <div class="card">
+    <div class="card-head"><h3>Milestone progress</h3></div>
+    <div class="mini-stat"><span class="l">M1 — ABHA creation/linking at registration</span>${status('green','Complete')}</div>
+    <div class="mini-stat"><span class="l">M2 — Digital record linking (FHIR R4)</span>${status('blue','In progress — 64%')}</div>
+    <div class="progress"><div style="width:64%"></div></div>
+    <div class="mini-stat" style="margin-top:12px;"><span class="l">M3 — Health information exchange & consent</span>${status('gray','Not started')}</div>
+  </div>
+`);
+
+/* ============== MRD ============== */
+registerScreen('mrd', () => `
+  ${tag('Role: medical records officer')}
+  <h1 class="scr">Medical records department (MRD)</h1>
+  <p class="scr-sub">Archival, retrieval, and retention-policy tracking for case papers.</p>
+  <div class="card">
+    <div class="card-head"><h3>Retrieval requests</h3></div>
+    <table>
+      <thead><tr><th>Patient</th><th>Requested by</th><th>Purpose</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>R. Pawar</td><td>Dr. Deshmukh</td><td>Follow-up consultation</td><td>${status('green','Retrieved')}</td></tr>
+        <tr><td>A. Khan (2019 record)</td><td>Legal cell</td><td>Court summon</td><td>${status('amber','Archival retrieval')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== NABH ============== */
+registerScreen('nabh', () => `
+  ${tag('Role: quality cell')}
+  <h1 class="scr">NABH compliance checklist</h1>
+  <p class="scr-sub">Documentation and workflow alignment with national accreditation standards.</p>
+  <div class="card">
+    <div class="card-head"><h3>Checklist progress — 62% complete</h3></div>
+    <div class="progress" style="margin-bottom:14px;"><div style="width:62%"></div></div>
+    <div class="mini-stat"><span class="l">Patient rights & education</span>${status('green','Complete')}</div>
+    <div class="mini-stat"><span class="l">Infection control protocols</span>${status('green','Complete')}</div>
+    <div class="mini-stat"><span class="l">Facility management & safety</span>${status('amber','In progress')}</div>
+    <div class="mini-stat"><span class="l">Continuous quality improvement</span>${status('gray','Not started')}</div>
+  </div>
+`);
+
+/* ============== REPORTS ============== */
+registerScreen('reports', () => `
+  ${tag('Role: superintendent · state health dept.')}
+  <h1 class="scr">Reports & MIS analytics</h1>
+  <p class="scr-sub">State health department reporting, scheme utilisation, custom reports.</p>
+  <div class="grid twocol">
+    <div class="card">
+      <div class="card-head"><h3>Department-wise OPD load — this month</h3></div>
+      <div class="chartwrap"><canvas id="cDept"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h3>Export</h3></div>
+      <button class="btn" style="width:100%; justify-content:center; margin-bottom:8px;">Monthly state health report</button>
+      <button class="btn" style="width:100%; justify-content:center; margin-bottom:8px;">PM-JAY claim summary</button>
+      <button class="btn" style="width:100%; justify-content:center;">Payroll & HR summary</button>
+    </div>
+  </div>
+`);
+window.init_reports = () => {
+  const el = document.getElementById('cDept'); if(!el) return;
+  new Chart(el, {type:'bar', data:{labels:['Medicine','Ortho','Gynae','Paeds','ENT','Surgery'],
+    datasets:[{data:[420,310,280,260,190,340], backgroundColor:'#3B6FE0', borderRadius:5, maxBarThickness:26}]},
+  options:{plugins:{legend:{display:false}}, scales:{y:{grid:{color:'#EEF2F7'}, ticks:{font:{size:10}}}, x:{grid:{display:false}, ticks:{font:{size:10}}}}}});
+};
+
+/* ============== ROLES ============== */
+registerScreen('roles', () => `
+  ${tag('Role: system admin')}
+  <h1 class="scr">Roles & access control</h1>
+  <p class="scr-sub">Granular, role-based permissions with full audit trail.</p>
+  <div class="card">
+    <table>
+      <thead><tr><th>Role</th><th>Patient data</th><th>HR / payroll</th><th>Billing</th><th>Admin settings</th></tr></thead>
+      <tbody>
+        <tr><td>Doctor</td><td>${status('green','Full')}</td><td>${status('gray','None')}</td><td>${status('gray','None')}</td><td>${status('gray','None')}</td></tr>
+        <tr><td>Nurse</td><td>${status('amber','Ward-level')}</td><td>${status('gray','None')}</td><td>${status('gray','None')}</td><td>${status('gray','None')}</td></tr>
+        <tr><td>HR officer</td><td>${status('gray','None')}</td><td>${status('green','Full')}</td><td>${status('gray','None')}</td><td>${status('gray','None')}</td></tr>
+        <tr><td>Billing desk</td><td>${status('amber','Limited')}</td><td>${status('gray','None')}</td><td>${status('green','Full')}</td><td>${status('gray','None')}</td></tr>
+        <tr><td>Superintendent</td><td>${status('amber','Read-only')}</td><td>${status('amber','Read-only')}</td><td>${status('amber','Read-only')}</td><td>${status('green','Full')}</td></tr>
+      </tbody>
+    </table>
+  </div>
+`);
+
+/* ============== PATIENT PORTAL ============== */
+registerScreen('portal', () => `
+  ${tag('Phase 4 — patient-facing')}
+  <h1 class="scr">Patient portal / app</h1>
+  <p class="scr-sub">ABHA-linked self-service for appointment booking and report access — later phase.</p>
+  <div class="card" style="max-width:340px; padding:0; overflow:hidden;">
+    <div style="background:var(--navy); color:#fff; padding:16px;">
+      <div style="font-weight:700; font-size:13px;">My health — SwasthyaCore</div>
+      <div style="font-size:11px; opacity:.7;">R. Pawar · ABHA linked</div>
+    </div>
+    <div style="padding:14px;">
+      <div class="mini-stat"><span class="l">Next appointment</span><span class="v">2 Jul, Dr. Deshmukh</span></div>
+      <div class="mini-stat"><span class="l">Latest report</span><span class="v">Blood glucose — ready</span></div>
+      <div class="mini-stat"><span class="l">Active prescriptions</span><span class="v">2</span></div>
+      <button class="btn primary" style="width:100%; justify-content:center; margin-top:12px;">Book appointment</button>
+    </div>
+  </div>
+`);
+
+/* boot */
+show('dashboard', 'Dashboard');
+</script>
+</body>
+</html>
