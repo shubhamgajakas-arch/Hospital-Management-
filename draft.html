@@ -1,13 +1,16 @@
-<!DOCTYPE html>
+]<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Graden Boys - Hospital Management Platform</title>
+<title>Garden Boys - Hospital Management Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js" defer></script>
 <style>
   :root{
     --navy:#0B2545; --navy2:#13335C; --teal:#0E9C8C; --teal-d:#0A7567;
@@ -108,7 +111,7 @@
     background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
     box-shadow:var(--shadow); padding:16px 18px;
   }
-  .card-head{display:flex; align-items:center; justify-content:between; justify-content:space-between; margin-bottom:12px;}
+  .card-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
   .card-head h3{font-size:13.5px; font-weight:700; margin:0;}
   .card-head .more{font-size:11.5px; color:var(--teal-d); font-weight:600; cursor:pointer;}
 
@@ -158,6 +161,8 @@
   .btn.primary:hover{background:var(--teal-d);}
   .btn.navy{background:var(--navy); color:#fff; border-color:var(--navy);}
   .btn.sm{padding:5px 10px; font-size:11.5px;}
+  .btn-block{width:100%; justify-content:center;}
+  .btn-block + .btn-block{margin-top:8px;}
 
   .label{font-size:11px; font-weight:600; color:var(--ink-soft); margin-bottom:5px; display:block;}
   .field{
@@ -230,6 +235,12 @@
   .empty-note{
     border:1.5px dashed var(--line); border-radius:9px; padding:24px; text-align:center; color:var(--ink-faint); font-size:12px;
   }
+  .sb-item:focus-visible, .module-card:focus-visible{
+    outline:2px solid var(--teal); outline-offset:-2px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .screen.active{animation:none;}
+  }
 </style>
 </head>
 <body>
@@ -239,7 +250,7 @@
     <div class="sb-brand">
       <div class="mark">SC</div>
       <div>
-        <div class="name">Garden Boys </div>
+        <div class="name">Garden Boys</div>
         <div class="sub">Govt. Hospital Suite</div>
       </div>
     </div>
@@ -263,7 +274,7 @@
         <div class="tb-profile">
           <div class="avatar">RS</div>
           <div>
-            <div class="who">Dr. Adarsh </div>
+            <div class="who">Dr. Adarsh</div>
             <div class="role">Medical Superintendent</div>
           </div>
           <i class="bi bi-chevron-down" style="font-size:10px;color:var(--ink-faint);"></i>
@@ -326,28 +337,40 @@ const NAV = [
 const navScroll = document.getElementById('navScroll');
 NAV.forEach(g => {
   const gd = document.createElement('div'); gd.className = 'sb-group';
-  gd.innerHTML = `<div class="sb-group-label">${g.group}</div>`;
-  g.items.forEach(it => {
-    const el = document.createElement('div');
-    el.className = 'sb-item'; el.id = 'nav-' + it.id;
-    el.innerHTML = `<i class="bi ${it.icon}"></i><span>${it.label}</span>${it.badge ? `<span class="badge">${it.badge}</span>` : ''}`;
-    el.onclick = () => show(it.id, it.label);
-    gd.appendChild(el);
-  });
+  gd.innerHTML = `<div class="sb-group-label">${g.group}</div>` + g.items.map(it => `
+    <div class="sb-item" id="nav-${it.id}" data-nav="${it.id}" data-label="${it.label}" role="button" tabindex="0">
+      <i class="bi ${it.icon}"></i><span>${it.label}</span>${it.badge ? `<span class="badge">${it.badge}</span>` : ''}
+    </div>`).join('');
   navScroll.appendChild(gd);
+});
+
+// one delegated listener instead of a closure per sidebar item
+navScroll.addEventListener('click', e => {
+  const item = e.target.closest('[data-nav]');
+  if(item) show(item.dataset.nav, item.dataset.label);
+});
+navScroll.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const item = e.target.closest('[data-nav]');
+  if(item){ e.preventDefault(); show(item.dataset.nav, item.dataset.label); }
 });
 
 const content = document.getElementById('content');
 const BUILDERS = {};
 function registerScreen(id, fn){ BUILDERS[id] = fn; }
 
+let activeNavEl = null;
+let activeScreenEl = null;
+
 function show(id, label){
-  document.querySelectorAll('.sb-item').forEach(e => e.classList.remove('active'));
-  const navEl = document.getElementById('nav-' + id);
-  if(navEl) navEl.classList.add('active');
+  if(activeNavEl) activeNavEl.classList.remove('active');
+  activeNavEl = document.getElementById('nav-' + id);
+  if(activeNavEl) activeNavEl.classList.add('active');
+
   document.getElementById('crumbNow').textContent = label || id;
   document.getElementById('titleNow').textContent = label || id;
-  document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
+
+  if(activeScreenEl) activeScreenEl.classList.remove('active');
   let scr = document.getElementById('scr-' + id);
   if(!scr){
     scr = document.createElement('div');
@@ -357,12 +380,13 @@ function show(id, label){
     if(window['init_'+id]) requestAnimationFrame(window['init_'+id]);
   }
   scr.classList.add('active');
+  activeScreenEl = scr;
 }
 
 function placeholder(label){
   return `<div class="module-tag"><i class="bi bi-cone-striped"></i> Wireframe stub</div>
   <h1 class="scr">${label}</h1>
-  <p class="scr-sub">Screen layout to be detailed in the next design pass — included in module list for completeness.</p>
+  <p class="scr-sub">Screen layout to be detailed in the next design pass: included in module list for completeness.</p>
   <div class="empty-note">Low-priority for first clickable prototype. Structure follows the same card/table pattern as the screens already built out.</div>`;
 }
 
@@ -378,7 +402,7 @@ function status(color,text){return `<span class="status ${color}"><span class="d
 registerScreen('dashboard', () => `
   ${tag('Role: medical superintendent')}
   <h1 class="scr">Good morning, Dr. Adarsh</h1>
-  <p class="scr-sub">Cross-department snapshot across all 28 modules — General Medical Hospital, Nashik · Tuesday, 30 Jun</p>
+  <p class="scr-sub">Cross-department snapshot across all 28 modules: General Medical Hospital, Nashik · Tuesday, 30 Jun</p>
 
   <div class="grid kpis">
     ${kpi('blue','bi-hospital','3%',true,'412 / 500','Beds occupied today')}
@@ -389,7 +413,7 @@ registerScreen('dashboard', () => `
 
   <div class="grid twocol" style="margin-bottom:16px;">
     <div class="card">
-      <div class="card-head"><h3>OPD footfall — last 7 days</h3><span class="more">View report</span></div>
+      <div class="card-head"><h3>OPD footfall: last 7 days</h3><span class="more">View report</span></div>
       <div class="chartwrap"><canvas id="cFootfall"></canvas></div>
     </div>
     <div class="card">
@@ -404,14 +428,14 @@ registerScreen('dashboard', () => `
       <div class="mini-stat"><span class="l">ABDM / ABHA linking rate</span><span class="v">71% of patients</span></div>
       <div class="progress"><div style="width:71%"></div></div>
       <div class="mini-stat" style="margin-top:12px;"><span class="l">HFR facility registration</span>${status('green','Active')}</div>
-      <div class="mini-stat"><span class="l">Payroll cycle — June</span>${status('amber','Processing')}</div>
+      <div class="mini-stat"><span class="l">Payroll cycle: June</span>${status('amber','Processing')}</div>
       <div class="mini-stat"><span class="l">NABH checklist completion</span><span class="v">62%</span></div>
       <div class="mini-stat"><span class="l">Pharmacy stock-out risk</span>${status('red','6 items low')}</div>
     </div>
     <div class="card">
       <div class="card-head"><h3>Alerts</h3></div>
-      <div class="alert red"><i class="bi bi-exclamation-triangle-fill"></i> Ward 3B — 2 beds flagged critical, review needed</div>
-      <div class="alert amber"><i class="bi bi-droplet-half"></i> Pharmacy — Amoxicillin batch expiring in 12 days</div>
+      <div class="alert red"><i class="bi bi-exclamation-triangle-fill"></i> Ward 3B: 2 beds flagged critical, review needed</div>
+      <div class="alert amber"><i class="bi bi-droplet-half"></i> Pharmacy: Amoxicillin batch expiring in 12 days</div>
       <div class="alert blue"><i class="bi bi-shield-check"></i> 23 PM-JAY claims awaiting pre-authorisation</div>
       <div class="alert amber"><i class="bi bi-people"></i> 6 payroll records flagged for HR review</div>
     </div>
@@ -461,23 +485,34 @@ const MODULES = [
   ['Analytics & MIS reporting','bi-bar-chart-line','teal','3','reports'],
   ['Patient portal / app','bi-phone','blue','4','portal'],
 ];
+const MODULE_TINTS = {blue:'bluetint', teal:'tealtint', amber:'ambertint', red:'redtint'};
+const MODULE_COLS = {blue:'#3B6FE0', teal:'#0E9C8C', amber:'#946C0B', red:'#D9534F'};
 registerScreen('modulemap', () => `
   ${tag('28 modules · 4-phase build plan')}
   <h1 class="scr">All modules</h1>
   <p class="scr-sub">Full module inventory researched against current HMS/HRMS standards and India's ABDM digital health mandate. Click any card to open its screen.</p>
   <div class="grid module-grid">
-    ${MODULES.map(([t,icon,c,phase,target]) => {
-      const tints = {blue:'bluetint', teal:'tealtint', amber:'ambertint', red:'redtint'};
-      const cols = {blue:'#3B6FE0', teal:'#0E9C8C', amber:'#946C0B', red:'#D9534F'};
-      return `<div class="module-card" onclick="show('${target}','${t.replace(/'/g,"")}')">
-        <div class="ico" style="background:var(--${tints[c]});color:${cols[c]}"><i class="bi ${icon}"></i></div>
+    ${MODULES.map(([t,icon,c,phase,target]) => `
+      <div class="module-card" data-goto="${target}" data-label="${t}" role="button" tabindex="0">
+        <div class="ico" style="background:var(--${MODULE_TINTS[c]});color:${MODULE_COLS[c]}"><i class="bi ${icon}"></i></div>
         <div class="t">${t}</div>
         <div class="d">Tap to open the working screen for this module.</div>
-        <span class="phase" style="background:var(--${tints[c]});color:${cols[c]}">Phase ${phase}</span>
-      </div>`;
-    }).join('')}
+        <span class="phase" style="background:var(--${MODULE_TINTS[c]});color:${MODULE_COLS[c]}">Phase ${phase}</span>
+      </div>`).join('')}
   </div>
 `);
+
+// delegated listener: handles module-map card clicks (and any future data-goto element)
+// without inline onclick strings, so labels with quotes/special characters can't break the markup
+content.addEventListener('click', e => {
+  const card = e.target.closest('[data-goto]');
+  if(card) show(card.dataset.goto, card.dataset.label);
+});
+content.addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const card = e.target.closest('[data-goto]');
+  if(card){ e.preventDefault(); show(card.dataset.goto, card.dataset.label); }
+});
 
 /* ============== REGISTRATION ============== */
 registerScreen('registration', () => `
@@ -500,8 +535,8 @@ registerScreen('registration', () => `
           <button class="btn sm primary">Scan</button>
         </div>
       </div>
-      <select class="field"><option>Department — General medicine</option></select>
-      <button class="btn primary" style="width:100%; justify-content:center;">Register & issue OPD token</button>
+      <select class="field"><option>Department: General medicine</option></select>
+      <button class="btn primary btn-block">Register & issue OPD token</button>
     </div>
     <div class="card">
       <div class="card-head"><h3>Today's registrations</h3></div>
@@ -511,7 +546,7 @@ registerScreen('registration', () => `
           <tr><td><div class="tname"><div class="av">RP</div>R. Pawar</div></td><td>${status('green','Linked')}</td><td>Medicine</td></tr>
           <tr><td><div class="tname"><div class="av">SK</div>S. Kale</div></td><td>${status('amber','Pending')}</td><td>Ortho</td></tr>
           <tr><td><div class="tname"><div class="av">MI</div>M. Iyer</div></td><td>${status('green','Linked')}</td><td>Gynae</td></tr>
-          <tr><td><div class="tname"><div class="av">AD</div>A. Deshmukh</div></td><td>${status('gray','Not started')}</td><td>—</td></tr>
+          <tr><td><div class="tname"><div class="av">AD</div>A. Deshmukh</div></td><td>${status('gray','Not started')}</td><td>-</td></tr>
         </tbody>
       </table>
     </div>
@@ -539,7 +574,7 @@ registerScreen('opd', () => `
         <tr><td>A-014</td><td><div class="tname"><div class="av">RP</div>R. Pawar · 42M</div></td><td>${status('green','Linked')}</td><td>Dr. A. Deshmukh</td><td>${status('blue','With doctor')}</td><td><span class="btn sm">View</span></td></tr>
         <tr><td>A-015</td><td><div class="tname"><div class="av">SK</div>S. Kale · 35F</div></td><td>${status('amber','Not linked')}</td><td>Dr. A. Deshmukh</td><td>${status('amber','Waiting')}</td><td><span class="btn sm">View</span></td></tr>
         <tr><td>A-016</td><td><div class="tname"><div class="av">MI</div>M. Iyer · 29F</div></td><td>${status('green','Linked')}</td><td>Dr. N. Bhosale</td><td>${status('amber','Waiting')}</td><td><span class="btn sm">View</span></td></tr>
-        <tr><td>A-017</td><td><div class="tname"><div class="av">+</div>New patient</td><td>—</td><td>Dr. N. Bhosale</td><td>${status('gray','Registering')}</td><td><span class="btn sm">View</span></td></tr>
+        <tr><td>A-017</td><td><div class="tname"><div class="av">+</div>New patient</td><td>-</td><td>Dr. N. Bhosale</td><td>${status('gray','Registering')}</td><td><span class="btn sm">View</span></td></tr>
         <tr><td>A-018</td><td><div class="tname"><div class="av">PJ</div>P. Joshi · 58M</td><td>${status('green','Linked')}</td><td>Dr. A. Deshmukh</td><td>${status('green','Completed')}</td><td><span class="btn sm">View</span></td></tr>
       </tbody>
     </table>
@@ -550,7 +585,7 @@ registerScreen('opd', () => `
 registerScreen('emr', () => `
   ${tag('Role: doctor')}
   <h1 class="scr">EMR / digital case paper</h1>
-  <p class="scr-sub">One continuous clinical record per patient — replaces the physical case sheet.</p>
+  <p class="scr-sub">One continuous clinical record per patient: replaces the physical case sheet.</p>
   <div class="grid twocol">
     <div class="card">
       <div class="tabbar">
@@ -580,9 +615,9 @@ registerScreen('emr', () => `
       </div>
       <div class="card">
         <div class="card-head"><h3>Visit history</h3></div>
-        <div class="mini-stat"><span class="l">12 Jun — General medicine</span><span class="v">Follow-up</span></div>
-        <div class="mini-stat"><span class="l">02 Apr — Laboratory</span><span class="v">Blood test</span></div>
-        <div class="mini-stat"><span class="l">19 Feb — Orthopaedics</span><span class="v">Consultation</span></div>
+        <div class="mini-stat"><span class="l">12 Jun: General medicine</span><span class="v">Follow-up</span></div>
+        <div class="mini-stat"><span class="l">02 Apr: Laboratory</span><span class="v">Blood test</span></div>
+        <div class="mini-stat"><span class="l">19 Feb: Orthopaedics</span><span class="v">Consultation</span></div>
       </div>
     </div>
   </div>
@@ -608,17 +643,17 @@ registerScreen('ipd', () => {
     ${kpi('amber','bi-arrow-left-right','',true,'27','Admissions today')}
   </div>
   <div class="card" style="margin-bottom:16px;">
-    <div class="card-head"><h3>Ward 3B — General surgery (30 beds)</h3><span class="more">Switch ward ▾</span></div>
+    <div class="card-head"><h3>Ward 3B: General surgery (30 beds)</h3><span class="more">Switch ward ▾</span></div>
     <div class="bedgrid">${beds}</div>
     <div class="legend">
       <span><i style="background:var(--green)"></i>Free</span>
       <span><i style="background:var(--blue)"></i>Occupied</span>
-      <span><i style="background:var(--red)"></i>Critical — review</span>
+      <span><i style="background:var(--red)"></i>Critical: review</span>
       <span><i style="background:var(--amber)"></i>Cleaning / turnover</span>
     </div>
   </div>
   <div class="card">
-    <div class="card-head"><h3>Nursing station — medication administration record (Bed 4, R. Pawar)</h3></div>
+    <div class="card-head"><h3>Nursing station: medication administration record (Bed 4, R. Pawar)</h3></div>
     <table>
       <thead><tr><th>Time</th><th>Medication</th><th>Dose</th><th>Status</th></tr></thead>
       <tbody>
@@ -642,7 +677,7 @@ registerScreen('ot', () => `
     ${kpi('green','bi-speedometer2','',true,'82%','OT utilisation rate')}
   </div>
   <div class="card">
-    <div class="card-head"><h3>Theatre schedule — today</h3></div>
+    <div class="card-head"><h3>Theatre schedule: today</h3></div>
     <table>
       <thead><tr><th>OT</th><th>Time</th><th>Patient</th><th>Procedure</th><th>Surgeon</th><th>Status</th></tr></thead>
       <tbody>
@@ -671,7 +706,7 @@ registerScreen('emergency', () => `
       </div>
       <input class="field" placeholder="Patient name / unknown">
       <input class="field" placeholder="Presenting complaint">
-      <button class="btn primary" style="width:100%; justify-content:center;">Admit to casualty</button>
+      <button class="btn primary btn-block">Admit to casualty</button>
     </div>
     <div class="card">
       <div class="card-head"><h3>Active casualty cases</h3></div>
@@ -680,7 +715,7 @@ registerScreen('emergency', () => `
         <tbody>
           <tr><td>Unknown male, ~30</td><td>Road traffic accident</td><td>${status('red','Critical')}</td><td>11 min ago</td></tr>
           <tr><td>K. Shaikh</td><td>Chest pain</td><td>${status('red','Critical')}</td><td>24 min ago</td></tr>
-          <tr><td>V. Rane</td><td>Fracture — forearm</td><td>${status('amber','Urgent')}</td><td>40 min ago</td></tr>
+          <tr><td>V. Rane</td><td>Fracture: forearm</td><td>${status('amber','Urgent')}</td><td>40 min ago</td></tr>
           <tr><td>T. Gupta</td><td>High fever</td><td>${status('green','Stable')}</td><td>1 hr ago</td></tr>
         </tbody>
       </table>
@@ -701,7 +736,7 @@ registerScreen('pharmacy', () => `
   </div>
   <div class="grid twocol">
     <div class="card">
-      <div class="card-head"><h3>Dispensing queue — from EMR prescriptions</h3></div>
+      <div class="card-head"><h3>Dispensing queue: from EMR prescriptions</h3></div>
       <table>
         <thead><tr><th>Patient</th><th>Drug</th><th>Stock</th><th></th></tr></thead>
         <tbody>
@@ -713,9 +748,9 @@ registerScreen('pharmacy', () => `
     </div>
     <div class="card">
       <div class="card-head"><h3>Expiry watch</h3></div>
-      <div class="mini-stat"><span class="l">Amoxicillin — batch AX221</span><span class="v" style="color:var(--red)">12 days</span></div>
-      <div class="mini-stat"><span class="l">Insulin — batch IN087</span><span class="v" style="color:var(--amber)">24 days</span></div>
-      <div class="mini-stat"><span class="l">ORS sachets — batch OR410</span><span class="v" style="color:var(--amber)">29 days</span></div>
+      <div class="mini-stat"><span class="l">Amoxicillin: batch AX221</span><span class="v" style="color:var(--red)">12 days</span></div>
+      <div class="mini-stat"><span class="l">Insulin: batch IN087</span><span class="v" style="color:var(--amber)">24 days</span></div>
+      <div class="mini-stat"><span class="l">ORS sachets: batch OR410</span><span class="v" style="color:var(--amber)">29 days</span></div>
     </div>
   </div>
 `);
@@ -793,7 +828,7 @@ registerScreen('bloodbank', () => `
 registerScreen('employees', () => `
   ${tag('Role: HR / admin office')}
   <h1 class="scr">Employee directory & service records</h1>
-  <p class="scr-sub">Doctors, nurses, paramedical & support staff — postings, transfers, service history.</p>
+  <p class="scr-sub">Doctors, nurses, paramedical & support staff: postings, transfers, service history.</p>
   <div class="grid kpis">
     ${kpi('blue','bi-people','',true,'612','Total staff on roll')}
     ${kpi('teal','bi-person-check','',false,'94%','Present today')}
@@ -822,7 +857,7 @@ registerScreen('attendance', () => `
   <p class="scr-sub">Biometric/manual attendance and shift roster across departments.</p>
   <div class="grid twocol">
     <div class="card">
-      <div class="card-head"><h3>Duty roster — Ward 3B, this week</h3></div>
+      <div class="card-head"><h3>Duty roster: Ward 3B, this week</h3></div>
       <table>
         <thead><tr><th>Staff</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th></tr></thead>
         <tbody>
@@ -861,7 +896,7 @@ registerScreen('leave', () => `
       </table>
     </div>
     <div class="card">
-      <div class="card-head"><h3>Leave balance — P. Joshi</h3></div>
+      <div class="card-head"><h3>Leave balance: P. Joshi</h3></div>
       <div class="mini-stat"><span class="l">Casual leave</span><span class="v">6 / 12</span></div>
       <div class="mini-stat"><span class="l">Earned leave</span><span class="v">14 / 30</span></div>
       <div class="mini-stat"><span class="l">Medical leave</span><span class="v">3 / 15</span></div>
@@ -900,7 +935,7 @@ registerScreen('payroll', () => `
 
 /* ============== RECRUITMENT ============== */
 registerScreen('recruitment', () => `
-  ${tag('Role: HR — recruitment, training, pension, statutory')}
+  ${tag('Role: HR: recruitment, training, pension, statutory')}
   <h1 class="scr">Recruitment, training & retirement workflows</h1>
   <p class="scr-sub">Covers vacancy tracking, CME training credits, pension processing, and statutory compliance.</p>
   <div class="tabbar">
@@ -913,7 +948,7 @@ registerScreen('recruitment', () => `
       <tbody>
         <tr><td>Staff nurse (2 posts)</td><td>ICU</td><td>34</td><td>${status('blue','Shortlisting')}</td></tr>
         <tr><td>Radiology technician</td><td>Radiology</td><td>11</td><td>${status('amber','Document verification')}</td></tr>
-        <tr><td>Junior resident — Medicine</td><td>Medicine</td><td>19</td><td>${status('green','Interview scheduled')}</td></tr>
+        <tr><td>Junior resident: Medicine</td><td>Medicine</td><td>19</td><td>${status('green','Interview scheduled')}</td></tr>
       </tbody>
     </table>
   </div>
@@ -995,7 +1030,7 @@ registerScreen('accounts', () => `
   <p class="scr-sub">Budget tracking, expenditure, and government audit-ready ledgers.</p>
   <div class="grid twocol">
     <div class="card">
-      <div class="card-head"><h3>Budget utilisation — FY 2026-27</h3></div>
+      <div class="card-head"><h3>Budget utilisation: FY 2026-27</h3></div>
       <div class="chartwrap sm"><canvas id="cBudget"></canvas></div>
     </div>
     <div class="card">
@@ -1043,7 +1078,7 @@ registerScreen('support', () => `
 registerScreen('abdm', () => `
   ${tag('Role: compliance officer')}
   <h1 class="scr">ABDM / ABHA compliance centre</h1>
-  <p class="scr-sub">National digital health stack — facility, professional & patient-ID registries.</p>
+  <p class="scr-sub">National digital health stack: facility, professional & patient-ID registries.</p>
   <div class="grid kpis">
     ${kpi('teal','bi-shield-check','',true,'71%','Patients ABHA-linked')}
     ${kpi('blue','bi-building-check','',false,'Active','HFR facility status')}
@@ -1052,10 +1087,10 @@ registerScreen('abdm', () => `
   </div>
   <div class="card">
     <div class="card-head"><h3>Milestone progress</h3></div>
-    <div class="mini-stat"><span class="l">M1 — ABHA creation/linking at registration</span>${status('green','Complete')}</div>
-    <div class="mini-stat"><span class="l">M2 — Digital record linking (FHIR R4)</span>${status('blue','In progress — 64%')}</div>
+    <div class="mini-stat"><span class="l">M1: ABHA creation/linking at registration</span>${status('green','Complete')}</div>
+    <div class="mini-stat"><span class="l">M2: Digital record linking (FHIR R4)</span>${status('blue','In progress: 64%')}</div>
     <div class="progress"><div style="width:64%"></div></div>
-    <div class="mini-stat" style="margin-top:12px;"><span class="l">M3 — Health information exchange & consent</span>${status('gray','Not started')}</div>
+    <div class="mini-stat" style="margin-top:12px;"><span class="l">M3: Health information exchange & consent</span>${status('gray','Not started')}</div>
   </div>
 `);
 
@@ -1082,7 +1117,7 @@ registerScreen('nabh', () => `
   <h1 class="scr">NABH compliance checklist</h1>
   <p class="scr-sub">Documentation and workflow alignment with national accreditation standards.</p>
   <div class="card">
-    <div class="card-head"><h3>Checklist progress — 62% complete</h3></div>
+    <div class="card-head"><h3>Checklist progress: 62% complete</h3></div>
     <div class="progress" style="margin-bottom:14px;"><div style="width:62%"></div></div>
     <div class="mini-stat"><span class="l">Patient rights & education</span>${status('green','Complete')}</div>
     <div class="mini-stat"><span class="l">Infection control protocols</span>${status('green','Complete')}</div>
@@ -1098,14 +1133,14 @@ registerScreen('reports', () => `
   <p class="scr-sub">State health department reporting, scheme utilisation, custom reports.</p>
   <div class="grid twocol">
     <div class="card">
-      <div class="card-head"><h3>Department-wise OPD load — this month</h3></div>
+      <div class="card-head"><h3>Department-wise OPD load: this month</h3></div>
       <div class="chartwrap"><canvas id="cDept"></canvas></div>
     </div>
     <div class="card">
       <div class="card-head"><h3>Export</h3></div>
-      <button class="btn" style="width:100%; justify-content:center; margin-bottom:8px;">Monthly state health report</button>
-      <button class="btn" style="width:100%; justify-content:center; margin-bottom:8px;">PM-JAY claim summary</button>
-      <button class="btn" style="width:100%; justify-content:center;">Payroll & HR summary</button>
+      <button class="btn btn-block">Monthly state health report</button>
+      <button class="btn btn-block">PM-JAY claim summary</button>
+      <button class="btn btn-block">Payroll & HR summary</button>
     </div>
   </div>
 `);
@@ -1137,19 +1172,19 @@ registerScreen('roles', () => `
 
 /* ============== PATIENT PORTAL ============== */
 registerScreen('portal', () => `
-  ${tag('Phase 4 — patient-facing')}
+  ${tag('Phase 4: patient-facing')}
   <h1 class="scr">Patient portal / app</h1>
-  <p class="scr-sub">ABHA-linked self-service for appointment booking and report access — later phase.</p>
+  <p class="scr-sub">ABHA-linked self-service for appointment booking and report access: later phase.</p>
   <div class="card" style="max-width:340px; padding:0; overflow:hidden;">
     <div style="background:var(--navy); color:#fff; padding:16px;">
-      <div style="font-weight:700; font-size:13px;">My health — Garden Boys </div>
+      <div style="font-weight:700; font-size:13px;">My health: Garden Boys</div>
       <div style="font-size:11px; opacity:.7;">R. Pawar · ABHA linked</div>
     </div>
     <div style="padding:14px;">
       <div class="mini-stat"><span class="l">Next appointment</span><span class="v">2 Jul, Dr. Deshmukh</span></div>
-      <div class="mini-stat"><span class="l">Latest report</span><span class="v">Blood glucose — ready</span></div>
+      <div class="mini-stat"><span class="l">Latest report</span><span class="v">Blood glucose: ready</span></div>
       <div class="mini-stat"><span class="l">Active prescriptions</span><span class="v">2</span></div>
-      <button class="btn primary" style="width:100%; justify-content:center; margin-top:12px;">Book appointment</button>
+      <button class="btn primary btn-block" style="margin-top:12px;">Book appointment</button>
     </div>
   </div>
 `);
